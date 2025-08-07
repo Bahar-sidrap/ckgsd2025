@@ -20,13 +20,14 @@
         }
         .form-container {
             background-color: #ffffff;
-            padding: 1.5 rem; /* Increased padding */
+            padding: 2.5rem; /* Increased padding */
             border-radius: 1rem; /* More rounded corners */
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Stronger shadow */
             width: 100%;
             max-width: 800px; /* Wider form */
             margin-top: 20px;
-            margin-bottom: 20px;
+            /* Tambahkan padding di bawah agar konten tidak tertutup navigasi fixed */
+            padding-bottom: 80px; 
         }
         fieldset {
             border: 1px solid #e5e7eb; /* Lighter border */
@@ -145,12 +146,20 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Specific styles for the navigation buttons */
+        /* Perubahan utama untuk navigasi fixed di bawah */
         .nav-buttons {
+            position: fixed; /* Membuat navigasi tetap di layar */
+            bottom: 0; /* Menempel di bagian bawah */
+            left: 0;
+            width: 100%;
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff; /* Latar belakang putih */
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* Bayangan di atas */
+            z-index: 100; /* Memastikan navigasi di atas konten lain */
+            padding: 10px 20px; /* Padding untuk jarak dari tepi */
+            box-sizing: border-box; /* Menghitung padding dalam lebar */
         }
         .nav-buttons button {
             width: auto;
@@ -158,6 +167,7 @@
             font-size: 1rem;
             box-shadow: none;
             background-color: #6b7280; /* Gray for navigation */
+            flex: 1; /* Tombol akan membesar untuk mengisi ruang yang sama */
         }
         .nav-buttons button:hover {
             background-color: #4b5563;
@@ -193,13 +203,8 @@
 </head>
 <body>
     <div class="form-container">
-        <div class="nav-buttons">
-            <button id="listViewBtn" class="active" onclick="showView('list')">Input</button>
-            <button id="rekapViewBtn" onclick="showView('rekap')">Rekap Data</button>
-        </div>
-
         <div id="listView" class="view active">
-            <h1 class="text-2xl font-bold text-center mb-8 text-gray-800">Data Inputan</h1>
+            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Daftar Data Kesehatan Siswa SD (Data Saya)</h1>
             <div class="flex justify-end items-center mb-6">
                 <button
                     onclick="showView('form')"
@@ -228,7 +233,7 @@
         </div>
 
         <div id="rekapView" class="view">
-            <h1 class="text-2xl font-bold text-center mb-8 text-gray-800">Rekap Data CKG</h1>
+            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Rekap Data Kesehatan Siswa SD (Global)</h1>
             <div class="download-controls">
                 <div class="flex-grow">
                     <label for="downloadSekolahSelect" class="text-sm font-medium text-gray-700">Pilih Sekolah:</label>
@@ -687,7 +692,11 @@
                 <div class="loading-spinner" id="loadingSpinner"></div>
             </div>
         </div>
+    </div>
 
+    <div class="nav-buttons">
+        <button id="listViewBtn" class="active" onclick="showView('list')">Daftar Data Saya</button>
+        <button id="rekapViewBtn" onclick="showView('rekap')">Rekap Data Global</button>
     </div>
 
     <script>
@@ -1319,9 +1328,27 @@
             navButtons.forEach(button => button.classList.remove('active')); // Hapus active dari semua tombol nav
 
             // Tampilkan tampilan yang diminta
-            document.getElementById(viewId + 'View').classList.add('active');
-            document.getElementById(viewId + 'ViewBtn').classList.add('active'); // Set active pada tombol nav
-
+            const viewElement = document.getElementById(viewId + 'View');
+            if (viewElement) {
+                viewElement.classList.add('active');
+            }
+            
+            // Perbarui tombol navigasi
+            let activeBtnId = '';
+            if (viewId === 'list') {
+                activeBtnId = 'listViewBtn';
+            } else if (viewId === 'rekap') {
+                activeBtnId = 'rekapViewBtn';
+            } else if (viewId === 'form') {
+                // Saat di form, tetap tandai tombol 'Daftar' sebagai aktif
+                activeBtnId = 'listViewBtn';
+            }
+            
+            const activeBtn = document.getElementById(activeBtnId);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+            
             // Muat data yang sesuai saat tampilan berubah
             if (viewId === 'list') {
                 loadMyDataList();
@@ -1342,4 +1369,3 @@
     </script>
 </body>
 </html>
-
