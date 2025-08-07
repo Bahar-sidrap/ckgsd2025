@@ -95,8 +95,8 @@
 
     <header class="bg-white shadow-sm py-4">
         <div class="container mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-800">Skrining Kesehatan Siswa</h1>
-            <img src="https://lh3.googleusercontent.com/u/1/drive-viewer/AEYm_BTPm_2U7k94zI-xWk_2q1E5m_T5D0-Gq3g_e79oFw8q_l5R6y14Ew1Y8Uv8_e7Lz4oH7vY1X-s9iC8008d5I7T5n_t9pA=w1920-h937" alt="Logo Puskesmas" class="h-12">
+            <h1 class="text-2xl font-bold text-gray-800">Skrining Kesehatan Siswa Puskesmas Lawawoi</h1>
+            <img src="https://webstoriess.enkosa.com/wp-content/uploads/2024/01/Download-Logo-Kabupaten-Sidenreng-Rappang-PNG.png" alt="Logo Puskesmas" class="h-12">
         </div>
     </header>
 
@@ -335,9 +335,9 @@
                             <select id="klasifikasiTekananDarah" name="Klasifikasi Tekanan Darah" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 <option value="">Pilih Klasifikasi</option>
                                 <option value="Normal <90/60 mmHg dan <95 persentil">Normal <90/60 mmHg dan <95 persentil</option>
-                                <option value="Pre-hipertensi Sistolik 90-120 mmHg dan/atau Diastolik 60-80 mmHg atau >=90 persentil dan <95 persentil">Pre-hipertensi Sistolik 90-120 mmHg dan/atau Diastolik 60-80 mmHg</option>
-                                <option value="Hipertensi tingkat 1 Sistolik 120-139 mmHg dan/atau Diastolik 80-89 mmHg atau >=95 persentil dan <99 persentil + 5 mmHg">Hipertensi tingkat 1 Sistolik 120-139 mmHg dan/atau Diastolik 80-89 mmHg </option>
-                                <option value="Hipertensi tingkat 2 >=140/90 mmHg atau >=99 persentil + 5 mmHg">Hipertensi tingkat 2 >=140/90 mmHg</option>
+                                <option value="Pre-hipertensi Sistolik 90-120 mmHg dan/atau Diastolik 60-80 mmHg atau >=90 persentil dan <95 persentil">Pre-hipertensi</option>
+                                <option value="Hipertensi tingkat 1 Sistolik 120-139 mmHg dan/atau Diastolik 80-89 mmHg atau >=95 persentil dan <99 persentil + 5 mmHg">Hipertensi tingkat 1</option>
+                                <option value="Hipertensi tingkat 2 >=140/90 mmHg atau >=99 persentil + 5 mmHg">Hipertensi tingkat 2</option>
                             </select>
                         </div>
                     </div>
@@ -464,10 +464,12 @@
                     <table id="myStudentTable" class="w-full text-left table-auto hidden">
                         <thead class="bg-gray-50 text-gray-600 text-sm font-semibold uppercase tracking-wider">
                             <tr>
+                                <th class="py-3 px-4">No</th>
                                 <th class="py-3 px-4 text-center">Status</th>
                                 <th class="py-3 px-4">Sekolah</th>
                                 <th class="py-3 px-4">Kelas</th>
                                 <th class="py-3 px-4">Nama</th>
+                                <th class="py-3 px-4"></th>
                             </tr>
                         </thead>
                         <tbody id="myStudentTableBody" class="bg-white divide-y divide-gray-200 text-gray-700">
@@ -535,19 +537,15 @@
     </main>
 
     <footer class="bg-white text-gray-600 text-center py-4 text-sm mt-8">
-        © 2024 Aplikasi Skrining Kesehatan Sekolah. Dibuat dengan ♥ oleh Puskesmas Allakuang
+        © 2025 Aplikasi Skrining Kesehatan Sekolah. Dibuat dengan oleh Baharuddin Puskesmas Lawawoi
     </footer>
 
 <script>
-    // URL Google Apps Script Web App Anda untuk MENGIRIM data (doPost)
     const REKAP_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8Vjz3Pc_fQsM73oH_5v5fQAP55PkMtC7sqMTvn2m-Xyk2i4Vx0gF9FXAUQApojcU-Yw/exec?action=getGlobalData';
     const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8Vjz3Pc_fQsM73oH_5v5fQAP55PkMtC7sqMTvn2m-Xyk2i4Vx0gF9FXAUQApojcU-Yw/exec';
 
-    // Variabel global untuk menyimpan data mentah yang diambil dari Google Sheets
     let globalRawData = [];
-    // Variabel untuk melacak timestamp dari data yang sedang diedit
     let editingTimestamp = null;
-    // Variabel untuk menyimpan referensi elemen DOM yang sering digunakan
     const dom = {
         messageModal: document.getElementById('messageModal'),
         messageText: document.getElementById('messageText'),
@@ -572,7 +570,6 @@
         downloadKelasSelect: document.getElementById('downloadKelasSelect'),
     };
     
-    // Fungsi untuk menampilkan pesan kustom
     function showMessage(message, isLoading = false) {
         dom.messageText.textContent = message;
         if (isLoading) {
@@ -583,22 +580,18 @@
         dom.messageModal.style.display = 'flex';
     }
 
-    // Fungsi untuk menyembunyikan pesan kustom
     function hideMessage() {
         dom.messageModal.style.display = 'none';
     }
 
-    // Tutup modal ketika tombol close diklik
     document.querySelector('#messageModal .close-button').addEventListener('click', hideMessage);
 
-    // Tutup modal ketika mengklik di luar area modal content
     window.addEventListener('click', (event) => {
         if (event.target === dom.messageModal) {
             hideMessage();
         }
     });
 
-    // Fungsi untuk mengotomatisasi perhitungan
     function calculateIMT() {
         const tinggiBadan = parseFloat(document.getElementById('tinggiBadan').value);
         const beratBadan = parseFloat(document.getElementById('beratBadan').value);
@@ -652,7 +645,6 @@
         }
     }
     
-    // FUNGSI INI SUDAH DIUBAH
     function calculateKlasifikasiTekananDarah() {
         const sistolik = parseFloat(document.getElementById('tekananDarahSistolik').value);
         const diastolik = parseFloat(document.getElementById('tekananDarahDiastolik').value);
@@ -674,7 +666,6 @@
         klasifikasiSelect.value = selectedValue;
     }
     
-    // Fungsi untuk menampilkan/menyembunyikan pertanyaan berdasarkan kelas
     function toggleConditionalFields() {
         const selectedClass = parseInt(dom.kelasSelect.value);
         const conditionalFields = ['kesehatanReproduksiField', 'merokokContainer', 'terpaparAsapRokokField', 'aktivitasFisikKuesionerField', 'parQChildField', 'imunisasiKuesionerField'];
@@ -690,7 +681,6 @@
             }
         });
         
-        // Atur ulang visibilitas detail merokok secara spesifik
         const merokokValue = dom.merokokSelect.value;
         if (selectedClass >= 4 && selectedClass <= 6 && merokokValue === 'Ya') {
             dom.merokokDetailFields.classList.remove('hidden');
@@ -699,7 +689,6 @@
         }
     }
     
-    // Fungsi untuk menyimpan data ke Local Storage
     function saveDataToLocalStorage(data) {
         try {
             let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
@@ -711,17 +700,18 @@
             showMessage('Terjadi kesalahan saat menyimpan data secara offline.');
         }
     }
-
-    // Fungsi untuk mengirim data ke Google Sheets dengan exponential backoff
+    
     async function sendDataToGoogleSheets(data, retries = 3, delay = 1000) {
         for (let i = 0; i < retries; i++) {
             try {
-                await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+                const response = await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data),
                 });
+                // Karena 'no-cors', response.ok akan selalu false. Kita asumsikan berhasil.
+                // Logika ini harus diubah jika kita bisa menggunakan cors.
                 return true;
             } catch (error) {
                 console.error(`Percobaan ${i + 1} gagal mengirim data:`, error);
@@ -733,7 +723,6 @@
         return false;
     }
 
-    // Fungsi sinkronisasi data
     async function syncDataToGoogleSheets() {
         let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
         if (storedData.length === 0) return;
@@ -763,7 +752,6 @@
         loadMyDataList();
     }
 
-    // Cek status online dan panggil sinkronisasi secara berkala
     function checkOnlineStatusAndSync() {
         if (navigator.onLine) {
             let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
@@ -774,7 +762,6 @@
         }
     }
     
-    // Fungsi untuk mereset formulir
     function resetFormToDefaults() {
         dom.dataSiswaForm.reset();
         document.getElementById('risikoTuberkulosis').value = 'Tidak';
@@ -810,10 +797,9 @@
         document.getElementById('namaSekolah').value = '';
         document.getElementById('kelas').value = '';
         
-        toggleConditionalFields(); // Panggil ini untuk menyembunyikan field kondisional
+        toggleConditionalFields();
     }
 
-    // Event listener untuk submit formulir
     dom.dataSiswaForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
@@ -852,6 +838,8 @@
         }
 
         localStorage.setItem('formDataSD', JSON.stringify(storedData));
+        editingTimestamp = null;
+        dom.submitButton.textContent = 'Simpan Data';
 
         if (navigator.onLine) {
             await syncDataToGoogleSheets();
@@ -862,7 +850,6 @@
         showView('list');
     });
     
-    // Fungsi Pencarian data
     function searchMyData() {
         const searchTerm = dom.searchInput.value.toLowerCase();
         let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
@@ -879,7 +866,6 @@
         loadMyDataList(filteredData);
     }
     
-    // Fungsi untuk memuat dan menampilkan data dari Local Storage
     function loadMyDataList(dataToDisplay = null) {
         dom.myStudentTableBody.innerHTML = '';
         const storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
@@ -893,25 +879,30 @@
             dom.myStudentTable.classList.remove('hidden');
             displayData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
-            displayData.forEach(data => {
+            displayData.forEach((data, index) => {
                 const statusIcon = data.isSynced
                     ? `<i class="fa-solid fa-circle-check text-green-500" title="Tersimpan di Sheet"></i>`
-                    : `<i class="fa-solid fa-circle-check text-gray-400" title="Belum tersimpan"></i>`;
+                    : `<i class="fa-solid fa-cloud-arrow-up text-gray-400" title="Belum tersimpan"></i>`;
                 
                 const row = dom.myStudentTableBody.insertRow();
                 row.classList.add('hover:bg-gray-100', 'cursor-pointer');
                 row.setAttribute('onclick', `editData('${data.timestamp}')`);
                 row.innerHTML = `
+                    <td class="py-3 px-4">${index + 1}</td>
                     <td class="py-3 px-4 text-center">${statusIcon}</td>
                     <td class="py-3 px-4">${data['Nama Satuan Pendidikan'] || ''}</td>
                     <td class="py-3 px-4">${data['Kelas'] || ''}</td>
                     <td class="py-3 px-4">${data['Nama'] || ''}</td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="event.stopPropagation(); deleteData('${data.timestamp}')" class="text-red-500 hover:text-red-700">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
                 `;
             });
         }
     }
     
-    // Fungsi untuk mengisi formulir dengan data yang dipilih
     function editData(timestamp) {
         let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
         const dataToEdit = storedData.find(item => item.timestamp === timestamp);
@@ -933,6 +924,18 @@
         
         toggleConditionalFields();
         showView('form');
+    }
+    
+    function deleteData(timestamp) {
+        if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+            return;
+        }
+
+        let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
+        const newData = storedData.filter(item => item.timestamp !== timestamp);
+        localStorage.setItem('formDataSD', JSON.stringify(newData));
+        loadMyDataList();
+        showMessage('Data berhasil dihapus.');
     }
 
     function getFormElementId(key) {
@@ -963,7 +966,6 @@
         return keyMap[key] || key;
     }
 
-    // Fungsi untuk memuat dan menampilkan rekap data global dari Google Sheets
     async function fetchGlobalData() {
         dom.globalStudentTable.classList.add('hidden');
         dom.noGlobalDataMessage.classList.add('hidden');
@@ -989,7 +991,7 @@
         dom.downloadSekolahSelect.innerHTML = `<option value="all">Semua Sekolah</option>`;
         const uniqueSchools = [...new Set(data.map(item => item['Nama Satuan Pendidikan']))];
         uniqueSchools.forEach(school => {
-            if (school) { // Pastikan nilai tidak kosong
+            if (school) {
                 const option = document.createElement('option');
                 option.value = school;
                 option.textContent = school;
@@ -1106,7 +1108,6 @@
         showMessage('File CSV berhasil diunduh.');
     }
 
-    // Fungsi untuk mengelola tampilan halaman
     function showView(viewId) {
         document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
         document.querySelectorAll('.nav-buttons button').forEach(button => button.classList.remove('active'));
@@ -1139,27 +1140,21 @@
         }
     }
 
-    // Inisialisasi Event Listeners saat DOM dimuat
     document.addEventListener('DOMContentLoaded', () => {
-        // Event listeners untuk perhitungan otomatis
         document.getElementById('tinggiBadan').addEventListener('input', calculateIMT);
         document.getElementById('beratBadan').addEventListener('input', calculateIMT);
         document.getElementById('tanggalLahir').addEventListener('change', calculateAge);
         document.getElementById('tekananDarahSistolik').addEventListener('input', calculateKlasifikasiTekananDarah);
         document.getElementById('tekananDarahDiastolik').addEventListener('input', calculateKlasifikasiTekananDarah);
 
-        // Event listeners untuk field kondisional
         dom.kelasSelect.addEventListener('change', toggleConditionalFields);
         dom.merokokSelect.addEventListener('change', toggleConditionalFields);
 
-        // Event listener untuk pencarian
         dom.searchInput.addEventListener('input', searchMyData);
         
-        // Event listeners untuk filter rekap
         dom.downloadSekolahSelect.addEventListener('change', filterAndDisplayRecap);
         dom.downloadKelasSelect.addEventListener('change', filterAndDisplayRecap);
 
-        // Tampilkan tampilan awal
         showView('form');
         checkOnlineStatusAndSync();
     });
