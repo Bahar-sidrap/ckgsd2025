@@ -1,752 +1,585 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulir Data Kesehatan Siswa SD</title>
+    <title>Sistem Informasi Skrining Kesehatan</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Custom styles for better aesthetics and responsiveness */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light gray background */
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align to top for longer forms */
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .form-container {
-            background-color: #ffffff;
-            padding: 1.5rem; /* Increased padding */
-            border-radius: 1rem; /* More rounded corners */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Stronger shadow */
-            width: 100%;
-            max-width: 800px; /* Wider form */
-            margin-top: 20px;
-            /* Tambahkan padding di bawah agar konten tidak tertutup navigasi fixed */
-            padding-bottom: 80px; 
-        }
-        fieldset {
-            border: 1px solid #e5e7eb; /* Lighter border */
-            padding: 1.5rem;
-            border-radius: 0.75rem; /* Rounded fieldset */
-            margin-bottom: 1.5rem; /* More space between fieldsets */
-        }
-        legend {
-            font-weight: 700; /* Bold legend */
-            color: #1f2937; /* Darker text */
-            padding: 0 0.5rem;
-            font-size: 1.25rem; /* Larger legend text */
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600; /* Semi-bold label */
-            color: #374151; /* Medium dark text */
-            font-size: 0.95rem; /* Slightly smaller label text */
-        }
-        input[type="text"],
-        input[type="number"],
-        input[type="date"],
-        select {
-            width: 100%;
-            padding: 0.75rem; /* More padding */
-            margin-bottom: 1rem; /* More space below inputs */
-            border: 1px solid #d1d5db; /* Lighter border */
-            border-radius: 0.5rem; /* Rounded input */
-            font-size: 1rem;
-            box-sizing: border-box; /* Include padding in width */
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        input[type="date"]:focus,
-        select:focus {
-            outline: none;
-            border-color: #3b82f6; /* Blue focus border */
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Light blue shadow on focus */
-        }
-        button {
-            background-color: #22c55e; /* Green button */
-            color: white;
-            padding: 1rem 2rem; /* Larger button */
-            border: none;
-            border-radius: 0.75rem; /* Rounded button */
-            cursor: pointer;
-            font-size: 1.125rem; /* Larger font */
-            font-weight: 700;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3); /* Green shadow */
-            width: 100%; /* Full width button */
-        }
-        button:hover {
-            background-color: #16a34a; /* Darker green on hover */
-            transform: translateY(-2px); /* Slight lift effect */
-        }
-        button:active {
-            transform: translateY(0); /* Press effect */
-            box-shadow: 0 2px 5px rgba(34, 197, 94, 0.4);
-        }
-        .hidden-field {
-            display: none; /* Hidden by default */
-        }
-        /* Custom Modal / Message Box Styles */
-        .modal {
-            display: none; /* Hidden by default */
+        /* Gaya dasar untuk modal */
+        #messageModal {
+            display: none;
+            /* Sembunyikan secara default */
             position: fixed;
             z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0, 0, 0, 0.4);
             justify-content: center;
             align-items: center;
         }
+
         .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 400px;
-            border-radius: 10px;
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 400px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
         }
+
         .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: black;
-            text-decoration: none;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
             cursor: pointer;
+            color: #aaa;
         }
-        /* Loading Spinner */
-        .loading-spinner {
-            display: none;
+
+        .close-button:hover {
+            color: #333;
+        }
+
+        .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #3b82f6;
+            border-top: 4px solid #3498db;
             border-radius: 50%;
             width: 30px;
             height: 30px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            margin: 0 auto 10px;
         }
 
-        /* Perubahan utama untuk navigasi fixed di bawah */
-        .nav-buttons {
-            position: fixed; /* Membuat navigasi tetap di layar */
-            bottom: 0; /* Menempel di bagian bawah */
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #ffffff; /* Latar belakang putih */
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* Bayangan di atas */
-            z-index: 100; /* Memastikan navigasi di atas konten lain */
-            padding: 10px 20px; /* Padding untuk jarak dari tepi */
-            box-sizing: border-box; /* Menghitung padding dalam lebar */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        .nav-buttons button {
-            width: auto;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            box-shadow: none;
-            background-color: #6b7280; /* Gray for navigation */
-            flex: 1; /* Tombol akan membesar untuk mengisi ruang yang sama */
-        }
-        .nav-buttons button:hover {
-            background-color: #4b5563;
-        }
-        .nav-buttons button.active {
-            background-color: #22c55e; /* Green for active tab */
-        }
+
+        /* Gaya untuk tampilan (views) */
         .view {
-            display: none; /* Hide all views by default */
+            display: none;
         }
+
         .view.active {
-            display: block; /* Show active view */
+            display: block;
         }
-        .download-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .download-controls select, .download-controls button {
-            width: 100%;
-        }
-        @media (min-width: 768px) {
-            .download-controls {
-                flex-direction: row;
-                align-items: flex-end;
-            }
-            .download-controls select, .download-controls button {
-                width: auto;
-            }
-        }
-        /* Style untuk baris tabel yang dapat diklik */
-        #myStudentTableBody tr {
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out;
-        }
-        #myStudentTableBody tr:hover {
-            background-color: #f3f4f6; /* Warna abu-abu muda saat di-hover */
-        }
-        .search-input-container {
-            margin-bottom: 1.5rem;
+
+        /* Gaya untuk tombol navigasi */
+        .nav-buttons button.active {
+            @apply bg-blue-600 text-white;
         }
     </style>
 </head>
-<body>
-    <div class="form-container">
-        <div id="listView" class="view active">
-            <h1 class="text-xl font-bold text-center mb-8 text-gray-800">Daftar Data Kesehatan Siswa SD (Data Saya)</h1>
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div class="flex-grow w-full">
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="Cari nama siswa..."
-                        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                </div>
-                <button
-                    onclick="showView('form')"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-2xl leading-none shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105 md:w-auto w-1/3"
-                    title="Tambah Data Baru"
-                >
-                    +
-                </button>
-            </div>
 
-            <div id="studentListContainer" class="overflow-x-auto">
-                <p class="text-center text-gray-500 mt-10" id="noMyDataMessage">Belum ada data siswa yang Anda input. Tekan tombol '+' untuk menambah data baru.</p>
-                <table class="min-w-full bg-white rounded-lg shadow-md hidden" id="myStudentTable">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold rounded-tl-lg">Status</th>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Nama Sekolah</th>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Kelas</th>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold rounded-tr-lg">Nama Siswa</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myStudentTableBody">
-                        </tbody>
-                </table>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+
+    <div id="messageModal">
+        <div class="modal-content">
+            <span class="close-button" onclick="hideMessage()">&times;</span>
+            <div id="loadingSpinner" class="spinner hidden"></div>
+            <p id="messageText" class="text-lg"></p>
+        </div>
+    </div>
+
+    <header class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Skrining Kesehatan Siswa Puskesmas Lawawoi</h1>
+            <img src="https://webstoriess.enkosa.com/wp-content/uploads/2024/01/Download-Logo-Kabupaten-Sidenreng-Rappang-PNG.png" alt="Logo Puskesmas" class="h-12">
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+
+        <div class="nav-buttons flex flex-wrap gap-2 mb-8">
+            <button id="formViewBtn" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-blue-500 hover:text-white transition-colors" onclick="showView('form')">
+                <i class="fa-solid fa-plus-circle mr-2"></i>Tambah Data
+            </button>
+            <button id="listViewBtn" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-blue-500 hover:text-white transition-colors" onclick="showView('list')">
+                <i class="fa-solid fa-table mr-2"></i>Data Saya
+            </button>
+            <button id="rekapViewBtn" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-blue-500 hover:text-white transition-colors" onclick="showView('rekap')">
+                <i class="fa-solid fa-chart-bar mr-2"></i>Rekap Data
+            </button>
+        </div>
+
+        <div id="formView" class="view active bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Formulir Skrining Kesehatan</h2>
+            <form id="dataSiswaForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
+                    <div>
+                        <label for="namaSekolah" class="block text-sm font-medium text-gray-700">Nama Satuan Pendidikan</label>
+                        <select id="namaSekolah" name="Nama Satuan Pendidikan" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">Pilih Sekolah</option>
+                            <option value="SDN 1 ARAWA">SDN 1 ARAWA</option>
+                            <option value="SDN 2 ARAWA">SDN 2 ARAWA</option>
+                            <option value="SDN 3 ARAWA">SDN 3 ARAWA</option>
+                            <option value="SDN 4 ARAWA">SDN 4 ARAWA</option>
+                            <option value="SDN 5 ARAWA">SDN 5 ARAWA</option>
+                            <option value="SDN 6 ARAWA">SDN 6 ARAWA</option>
+                            <option value="SDN 7 ARAWA">SDN 7 ARAWA</option>
+                            <option value="SDN 8 ARAWA">SDN 8 ARAWA</option>
+                            <option value="SDN 9 ARAWA">SDN 9 ARAWA</option>
+                            <option value="SDN 10 ARAWA">SDN 10 ARAWA</option>
+                            <option value="SDN 1 LAWAWOI">SDN 1 LAWAWOI</option>
+                            <option value="SDN 2 LAWAWOI">SDN 2 LAWAWOI</option>
+                            <option value="SDN 3 LAWAWOI">SDN 3 LAWAWOI</option>
+                            <option value="SDN 4 LAWAWOI">SDN 4 LAWAWOI</option>
+                            <option value="SDN 5 LAWAWOI">SDN 5 LAWAWOI</option>
+                            <option value="SDN 1 CARAWALI">SDN 1 CARAWALI</option>
+                            <option value="SDN 2 CARAWALI">SDN 2 CARAWALI</option>
+                            <option value="SDN 3 CARAWALI">SDN 3 CARAWALI</option>
+                            <option value="SDN 4 CARAWALI">SDN 4 CARAWALI</option>
+                            <option value="SDN 1 LAINUNGAN">SDN 1 LAINUNGAN</option>
+                            <option value="SDN 2 LAINUNGAN">SDN 2 LAINUNGAN</option>
+                            <option value="SDN 3 LAINUNGAN">SDN 3 LAINUNGAN</option>
+                            <option value="SDN 4 LAINUNGAN">SDN 4 LAINUNGAN</option>
+                            <option value="SD S IT AL IMAN">SD S IT AL IMAN</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="kelas" class="block text-sm font-medium text-gray-700">Kelas</label>
+                        <select id="kelas" name="Kelas" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">Pilih Kelas</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                        <input type="text" id="nama" name="Nama" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="jenisKelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+                        <select id="jenisKelamin" name="Jenis Kelamin" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">Pilih Jenis Kelamin</option>
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="nisn" class="block text-sm font-medium text-gray-700">NISN</label>
+                        <input type="number" id="nisn" name="NISN" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="nik" class="block text-sm font-medium text-gray-700">NIK</label>
+                        <input type="number" id="nik" name="NIK" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="tempatLahir" class="block text-sm font-medium text-gray-700">Tempat Lahir</label>
+                        <input type="text" id="tempatLahir" name="Tempat Lahir" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="tanggalLahir" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
+                        <input type="date" id="tanggalLahir" name="Tanggal Lahir" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="usia" class="block text-sm font-medium text-gray-700">Usia (Ulang tahun terakhir)</label>
+                        <input type="number" id="usia" name="Usia (Ulang tahun terakhir)" readonly class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 shadow-sm sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat</label>
+                        <input type="text" id="alamat" name="Alamat" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="noHp" class="block text-sm font-medium text-gray-700">No. HP</label>
+                        <input type="number" id="noHp" name="No. HP" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
+                    <h3 class="md:col-span-2 lg:col-span-3 text-lg font-semibold text-gray-800">Riwayat Kesehatan</h3>
+                    <div>
+                        <label for="risikoTuberkulosis" class="block text-sm font-medium text-gray-700">Risiko Tuberkulosis</label>
+                        <select id="risikoTuberkulosis" name="Risiko Tuberkulosis" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="risikoDiabetesMellitus" class="block text-sm font-medium text-gray-700">Risiko Diabetes Mellitus</label>
+                        <select id="risikoDiabetesMellitus" name="Risiko Diabetes Mellitus" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="risikoKesehatanJiwa" class="block text-sm font-medium text-gray-700">Risiko Kesehatan Jiwa</label>
+                        <select id="risikoKesehatanJiwa" name="Risiko Kesehatan Jiwa" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak Ada">Tidak Ada</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div id="kesehatanReproduksiField" class="hidden-field">
+                        <label for="kesehatanReproduksi" class="block text-sm font-medium text-gray-700">Kesehatan Reproduksi (Kelas 4-6)</label>
+                        <select id="kesehatanReproduksi" name="Kesehatan Reproduksi (Kelas 4-6)" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div id="merokokContainer">
+                        <label for="merokokDalam1TahunTerakhir" class="block text-sm font-medium text-gray-700">Merokok dalam 1 tahun terakhir (Kelas 4-6)</label>
+                        <select id="merokokDalam1TahunTerakhir" name="Merokok dalam 1 tahun terakhir" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div id="merokokDetailFields" class="md:col-span-2 hidden-field grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-100 p-4 rounded-lg">
+                        <div>
+                            <label for="jenisRokok" class="block text-sm font-medium text-gray-700">Jenis rokok</label>
+                            <input type="text" id="jenisRokok" name="Jenis rokok yang dikonsumsi" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="jumlahRokokPerHari" class="block text-sm font-medium text-gray-700">Jumlah rokok per hari</label>
+                            <input type="text" id="jumlahRokokPerHari" name="Jumlah rokok per hari" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="lamaMerokok" class="block text-sm font-medium text-gray-700">Lama merokok (dalam tahun)</label>
+                            <input type="text" id="lamaMerokok" name="Lama merokok (dalam tahun)" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+                    <div id="terpaparAsapRokokField">
+                        <label for="terpaparAsapRokok" class="block text-sm font-medium text-gray-700">Terpapar Asap Rokok Orang Lain (Kelas 4-6)</label>
+                        <select id="terpaparAsapRokok" name="Terpapar Asap Rokok Orang Lain" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="risikoHepatitisB" class="block text-sm font-medium text-gray-700">Risiko Hepatitis B</label>
+                        <select id="risikoHepatitisB" name="Risiko Hepatitis B" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div id="aktivitasFisikKuesionerField">
+                        <label for="aktivitasFisikKuesioner" class="block text-sm font-medium text-gray-700">Aktivitas Fisik (Kelas 4-6)</label>
+                        <select id="aktivitasFisikKuesioner" name="Aktivitas Fisik (kelas 4-6)" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Ya">Ya</option>
+                            <option value="Tidak">Tidak</option>
+                        </select>
+                    </div>
+                    <div id="parQChildField">
+                        <label for="parQChild" class="block text-sm font-medium text-gray-700">Par Q Child (Kelas 4-6)</label>
+                        <select id="parQChild" name="Par Q Child (kelas 4-6)" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div id="imunisasiKuesionerField">
+                        <label for="imunisasiKuesioner" class="block text-sm font-medium text-gray-700">Riwayat Imunisasi Rutin Lengkap (Kelas 4-6)</label>
+                        <select id="imunisasiKuesioner" name="Riwayat Imunisasi Rutin Lengkap" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Ya">Ya</option>
+                            <option value="Tidak">Tidak</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="risikoFrambusia" class="block text-sm font-medium text-gray-700">Risiko Frambusia</label>
+                        <select id="risikoFrambusia" name="Risiko Frambusia" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="risikoKusta" class="block text-sm font-medium text-gray-700">Risiko Kusta</label>
+                        <select id="risikoKusta" name="Risiko Kusta" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="risikoScabies" class="block text-sm font-medium text-gray-700">Risiko Scabies</label>
+                        <select id="risikoScabies" name="Risiko Scabies" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="risikoMalaria" class="block text-sm font-medium text-gray-700">Risiko Malaria khusus daerah endemis*</label>
+                        <select id="risikoMalaria" name="Risiko Malaria khusus daerah endemis*" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ya">Ya</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
+                    <h3 class="md:col-span-2 text-lg font-semibold text-gray-800">Hasil Pemeriksaan</h3>
+                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="tekananDarahSistolik" class="block text-sm font-medium text-gray-700">Sistolik (mmHg)</label>
+                            <input type="number" id="tekananDarahSistolik" name="Tekanan Darah Sistolik (mmHg)" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="tekananDarahDiastolik" class="block text-sm font-medium text-gray-700">Diastolik (mmHg)</label>
+                            <input type="number" id="tekananDarahDiastolik" name="Tekanan Darah Diastolik (mmHg)" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="klasifikasiTekananDarah" class="block text-sm font-medium text-gray-700">Klasifikasi Tekanan Darah</label>
+                            <input type="text" id="klasifikasiTekananDarah" name="Klasifikasi Tekanan Darah" readonly class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 shadow-sm sm:text-sm">
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label for="tinggiBadan" class="block text-sm font-medium text-gray-700">Tinggi Badan (cm)</label>
+                            <input type="number" id="tinggiBadan" name="Tinggi Badan" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="beratBadan" class="block text-sm font-medium text-gray-700">Berat Badan (kg)</label>
+                            <input type="number" id="beratBadan" name="Berat Badan" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="imt" class="block text-sm font-medium text-gray-700">IMT</label>
+                            <input type="text" id="imt" name="IMT" readonly class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 shadow-sm sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="penilaianStatusGizi" class="block text-sm font-medium text-gray-700">Penilaian Status Gizi</label>
+                            <input type="text" id="penilaianStatusGizi" name="Penilaian Status Gizi" readonly class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 shadow-sm sm:text-sm">
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="karies" class="block text-sm font-medium text-gray-700">Karies</label>
+                            <select id="karies" name="Karies" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="Tidak">Tidak</option>
+                                <option value="Ya">Ya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="masalahLainnyaGigi" class="block text-sm font-medium text-gray-700">Masalah lainnya</label>
+                            <input type="text" id="masalahLainnyaGigi" name="Masalah lainnya" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="mataLuar" class="block text-sm font-medium text-gray-700">Mata Luar</label>
+                            <select id="mataLuar" name="Mata Luar" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="Mata sehat">Mata sehat</option>
+                                <option value="Konjungtivitis">Konjungtivitis</option>
+                                <option value="Strabismus">Strabismus</option>
+                                <option value="Ptosis">Ptosis</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="gangguanTajamPenglihatan" class="block text-sm font-medium text-gray-700">Gangguan Tajam Penglihatan</label>
+                            <select id="gangguanTajamPenglihatan" name="Gangguan Tajam Penglihatan" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="Normal: Visus 6/6 - 6/9">Normal: Visus 6/6 - 6/9</option>
+                                <option value="Tidak Normal: Visus 6/12 - 6/60">Tidak Normal: Visus 6/12 - 6/60</option>
+                                <option value="Buta: Visus <6/60">Buta: Visus <6/60</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="infeksiTelinga" class="block text-sm font-medium text-gray-700">Infeksi (Telinga)</label>
+                            <select id="infeksiTelinga" name="Infeksi (Telinga)" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="Tidak">Tidak</option>
+                                <option value="Ya">Ya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="serumen" class="block text-sm font-medium text-gray-700">Serumen</label>
+                            <select id="serumen" name="Serumen" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="Tidak">Tidak</option>
+                                <option value="Ya">Ya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="gangguanTajamPendengaran" class="block text-sm font-medium text-gray-700">Gangguan Tajam Pendengaran</label>
+                            <select id="gangguanTajamPendengaran" name="Gangguan Tajam Pendengaran" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="Dapat mengulang kata lebih dari 80% (minimal 4 dari 5)">Dapat mengulang kata lebih dari 80% (minimal 4 dari 5)</option>
+                                <option value="Tidak dapat mengulang kata">Tidak dapat mengulang kata</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="waktuKebugaranJasmani" class="block text-sm font-medium text-gray-700">Waktu Kebugaran Jasmani (menit:detik)</label>
+                            <input type="text" id="waktuKebugaranJasmani" name="Waktu Kebugaran Jasmani" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Contoh: 15:30">
+                        </div>
+                        <div>
+                            <label for="kebugaranJasmani" class="block text-sm font-medium text-gray-700">Kebugaran Jasmani</label>
+                            <select id="kebugaranJasmani" name="Kebugaran Jasmani" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="Baik sekali/ Baik">Baik sekali/ Baik</option>
+                                <option value="Sedang">Sedang</option>
+                                <option value="Kurang">Kurang</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="kesimpulan" class="block text-sm font-medium text-gray-700">Kesimpulan</label>
+                        <select id="kesimpulan" name="Kesimpulan" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Tidak Rujuk">Tidak Rujuk</option>
+                            <option value="Rujuk">Rujuk</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 mt-4">
+                    <button id="submitButton" type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Simpan Data
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="listView" class="view">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">Daftar Data Saya (Offline)</h2>
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Cari berdasarkan nama..." class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fa-solid fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+                <div id="noMyDataMessage" class="text-center text-gray-500 py-10">
+                    <i class="fa-solid fa-folder-open text-6xl mb-4"></i>
+                    <p class="text-lg">Tidak ada data yang tersimpan secara offline.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="myStudentTable" class="w-full text-left table-auto hidden">
+                        <thead class="bg-gray-50 text-gray-600 text-sm font-semibold uppercase tracking-wider">
+                            <tr>
+                                <th class="py-3 px-4 text-center">Status</th>
+                                <th class="py-3 px-4">Sekolah</th>
+                                <th class="py-3 px-4">Kelas</th>
+                                <th class="py-3 px-4">Nama</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myStudentTableBody" class="bg-white divide-y divide-gray-200 text-gray-700">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <div id="rekapView" class="view">
-            <h1 class="text-xl font-bold text-center mb-8 text-gray-800">Rekap Data Kesehatan Siswa SD (Global)</h1>
-            <div class="download-controls">
-                <div class="flex-grow">
-                    <label for="downloadSekolahSelect" class="text-sm font-medium text-gray-700">Pilih Sekolah:</label>
-                    <select id="downloadSekolahSelect" class="w-full">
-                        <option value="all">Semua Sekolah</option>
-                        <option value="SDN 1 ARAWA">SDN 1 ARAWA</option>
-                        <option value="SDN 2 ARAWA">SDN 2 ARAWA</option>
-                        <option value="SDN 3 ARAWA">SDN 3 ARAWA</option>
-                        <option value="SDN 4 ARAWA">SDN 4 ARAWA</option>
-                        <option value="SDN 5 ARAWA">SDN 5 ARAWA</option>
-                        <option value="SDN 6 ARAWA">SDN 6 ARAWA</option>
-                        <option value="SDN 7 ARAWA">SDN 7 ARAWA</option>
-                        <option value="SDN 8 ARAWA">SDN 8 ARAWA</option>
-                        <option value="SDN 9 ARAWA">SDN 9 ARAWA</option>
-                        <option value="SDN 10 ARAWA">SDN 10 ARAWA</option>
-                        <option value="SDN 1 LAWAWOI">SDN 1 LAWAWOI</option>
-                        <option value="SDN 2 LAWAWOI">SDN 2 LAWAWOI</option>
-                        <option value="SDN 3 LAWAWOI">SDN 3 LAWAWOI</option>
-                        <option value="SDN 4 LAWAWOI">SDN 4 LAWAWOI</option>
-                        <option value="SDN 5 LAWAWOI">SDN 5 LAWAWOI</option>
-                        <option value="SDN 1 CARAWALI">SDN 1 CARAWALI</option>
-                        <option value="SDN 2 CARAWALI">SDN 2 CARAWALI</option>
-                        <option value="SDN 3 CARAWALI">SDN 3 CARAWALI</option>
-                        <option value="SDN 4 CARAWALI">SDN 4 CARAWALI</option>
-                        <option value="SDN 1 LAINUNGAN">SDN 1 LAINUNGAN</option>
-                        <option value="SDN 2 LAINUNGAN">SDN 2 LAINUNGAN</option>
-                        <option value="SDN 3 LAINUNGAN">SDN 3 LAINUNGAN</option>
-                        <option value="SDN 4 LAINUNGAN">SDN 4 LAINUNGAN</option>
-                        <option value="SD S IT AL IMAN">SD S IT AL IMAN</option>
-                    </select>
-                </div>
-                <div class="flex-grow">
-                    <label for="downloadKelasSelect" class="text-sm font-medium text-gray-700">Pilih Kelas:</label>
-                    <select id="downloadKelasSelect" class="w-full">
-                        <option value="all">Semua Kelas</option>
-                        <option value="1">Kelas 1</option>
-                        <option value="2">Kelas 2</option>
-                        <option value="3">Kelas 3</option>
-                        <option value="4">Kelas 4</option>
-                        <option value="5">Kelas 5</option>
-                        <option value="6">Kelas 6</option>
-                    </select>
-                </div>
-                <button
-                    onclick="downloadCSV()"
-                    class="py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-lg"
-                    style="width: 200px;"
-                >
-                    Unduh Data CSV
-                </button>
-            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Rekap Data Global (dari Google Sheet)</h2>
 
-            <div id="globalStudentListContainer" class="overflow-x-auto">
-                <p class="text-center text-gray-500 mt-10" id="loadingGlobalDataMessage">Memuat data global...</p>
-                <p class="text-center text-gray-500 mt-10 hidden" id="noGlobalDataMessage">Belum ada data global yang tersedia.</p>
-                <table class="min-w-full bg-white rounded-lg shadow-md hidden" id="globalStudentTable">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold rounded-tl-lg">No.</th>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Nama Sekolah</th>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Kelas</th>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold rounded-tr-lg">Jumlah Data</th>
-                        </tr>
-                    </thead>
-                    <tbody id="globalStudentTableBody">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="formView" class="view hidden">
-            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Formulir Data Kesehatan Siswa SD</h1>
-            <form id="dataSiswaForm">
-                <fieldset>
-                    <legend>Informasi Sekolah</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="col-span-1 md:col-span-2">
-                            <label for="namaSekolah">Nama Satuan Pendidikan:</label>
-                            <select id="namaSekolah" name="Nama Satuan Pendidikan" required class="w-full">
-                                <option value="">-- Pilih Sekolah --</option>
-                                <option value="SDN 1 ARAWA">SDN 1 ARAWA</option>
-                                <option value="SDN 2 ARAWA">SDN 2 ARAWA</option>
-                                <option value="SDN 3 ARAWA">SDN 3 ARAWA</option>
-                                <option value="SDN 4 ARAWA">SDN 4 ARAWA</option>
-                                <option value="SDN 5 ARAWA">SDN 5 ARAWA</option>
-                                <option value="SDN 6 ARAWA">SDN 6 ARAWA</option>
-                                <option value="SDN 7 ARAWA">SDN 7 ARAWA</option>
-                                <option value="SDN 8 ARAWA">SDN 8 ARAWA</option>
-                                <option value="SDN 9 ARAWA">SDN 9 ARAWA</option>
-                                <option value="SDN 10 ARAWA">SDN 10 ARAWA</option>
-                                <option value="SDN 1 LAWAWOI">SDN 1 LAWAWOI</option>
-                                <option value="SDN 2 LAWAWOI">SDN 2 LAWAWOI</option>
-                                <option value="SDN 3 LAWAWOI">SDN 3 LAWAWOI</option>
-                                <option value="SDN 4 LAWAWOI">SDN 4 LAWAWOI</option>
-                                <option value="SDN 5 LAWAWOI">SDN 5 LAWAWOI</option>
-                                <option value="SDN 1 CARAWALI">SDN 1 CARAWALI</option>
-                                <option value="SDN 2 CARAWALI">SDN 2 CARAWALI</option>
-                                <option value="SDN 3 CARAWALI">SDN 3 CARAWALI</option>
-                                <option value="SDN 4 CARAWALI">SDN 4 CARAWALI</option>
-                                <option value="SDN 1 LAINUNGAN">SDN 1 LAINUNGAN</option>
-                                <option value="SDN 2 LAINUNGAN">SDN 2 LAINUNGAN</option>
-                                <option value="SDN 3 LAINUNGAN">SDN 3 LAINUNGAN</option>
-                                <option value="SDN 4 LAINUNGAN">SDN 4 LAINUNGAN</option>
-                                <option value="SD S IT AL IMAN">SD S IT AL IMAN</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="jenjang">Jenjang:</label>
-                            <input type="text" id="jenjang" name="Jenjang" value="SD" readonly class="w-full bg-gray-100 cursor-not-allowed">
-                        </div>
-                        <div>
-                            <label for="kelas">Kelas:</label>
-                            <select id="kelas" name="Kelas" required class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="1">Kelas 1</option>
-                                <option value="2">Kelas 2</option>
-                                <option value="3">Kelas 3</option>
-                                <option value="4">Kelas 4</option>
-                                <option value="5">Kelas 5</option>
-                                <option value="6">Kelas 6</option>
-                            </select>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Data Identitas Siswa</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="nama">Nama Lengkap:</label>
-                            <input type="text" id="nama" name="Nama" placeholder="Masukkan nama lengkap" required class="w-full">
-                        </div>
-                        <div>
-                            <label for="jenisKelamin">Jenis Kelamin:</label>
-                            <select id="jenisKelamin" name="Jenis Kelamin" required class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="L">Laki-laki</option>
-                                <option value="P">Perempuan</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="nisn">NISN:</label>
-                            <input type="text" id="nisn" name="NISN" placeholder="Masukkan NISN" class="w-full">
-                        </div>
-                        <div>
-                            <label for="nik">NIK:</label>
-                            <input type="text" id="nik" name="NIK" placeholder="Masukkan NIK" class="w-full">
-                        </div>
-                        <div>
-                            <label for="tempatLahir">Tempat Lahir:</label>
-                            <input type="text" id="tempatLahir" name="Tempat Lahir" placeholder="Contoh: Makassar" class="w-full">
-                        </div>
-                        <div>
-                            <label for="tanggalLahir">Tanggal Lahir:</label>
-                            <input type="date" id="tanggalLahir" name="Tanggal Lahir" class="w-full">
-                        </div>
-                        <div>
-                            <label for="usia">Usia (Ulang tahun terakhir):</label>
-                            <input type="number" id="usia" name="Usia (Ulang tahun terakhir)" placeholder="Akan terisi otomatis" readonly class="w-full bg-gray-100 cursor-not-allowed">
-                        </div>
-                        <div>
-                            <label for="alamat">Alamat:</label>
-                            <input type="text" id="alamat" name="Alamat" placeholder="Masukkan alamat lengkap" class="w-full">
-                        </div>
-                        <div>
-                            <label for="noHp">No. HP:</label>
-                            <input type="text" id="noHp" name="No. HP" placeholder="Masukkan nomor HP" class="w-full">
-                        </div>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Hasil Kuesioner</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="risikoTuberkulosis">Risiko Tuberkulosis:</label>
-                            <select id="risikoTuberkulosis" name="Risiko Tuberkulosis" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="risikoDiabetesMellitus">Risiko Diabetes Mellitus:</label>
-                            <select id="risikoDiabetesMellitus" name="Risiko Diabetes Mellitus" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="risikoKesehatanJiwa">Risiko Kesehatan Jiwa:</label>
-                            <select id="risikoKesehatanJiwa" name="Risiko Kesehatan Jiwa" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Skala A">Skala A</option>
-                                <option value="Skala B">Skala B</option>
-                                <option value="Tidak Ada" selected>Tidak Ada</option>
-                            </select>
-                        </div>
-                        <div id="kesehatanReproduksiField" class="hidden-field">
-                            <label for="kesehatanReproduksi">Kesehatan Reproduksi (Kelas 4-6):</label>
-                            <select id="kesehatanReproduksi" name="Kesehatan Reproduksi (Kelas 4-6)" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div id="merokokContainer" class="hidden-field">
-                            <h3 class="font-semibold mb-2 text-gray-700">Merokok atau Terpapar Asap Rokok (Kelas 4-6)</h3>
-                            <div>
-                                <label for="merokokDalam1TahunTerakhir">Merokok dalam 1 tahun terakhir:</label>
-                                <select id="merokokDalam1TahunTerakhir" name="Merokok dalam 1 tahun terakhir" class="w-full">
-                                    <option value="">-- Pilih --</option>
-                                    <option value="Ya">Ya</option>
-                                    <option value="Tidak" selected>Tidak</option>
-                                </select>
-                            </div>
-
-                            <div id="merokokDetailFields" class="hidden-field mt-4 p-4 border rounded-lg bg-gray-50">
-                                <h4 class="font-semibold mb-2 text-gray-700">Detail Merokok:</h4>
-                                <div>
-                                    <label for="jenisRokok">Jenis rokok yang dikonsumsi:</label>
-                                    <select id="jenisRokok" name="Jenis rokok yang dikonsumsi" class="w-full">
-                                        <option value="">-- Pilih --</option>
-                                        <option value="Rokok Konvensional">Rokok Konvensional</option>
-                                        <option value="Rokok Elektronik">Rokok Elektronik</option>
-                                        <option value="Keduanya">Keduanya</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="jumlahRokokPerHari">Jumlah rokok per hari (>=1):</label>
-                                    <input type="number" id="jumlahRokokPerHari" name="Jumlah rokok per hari" placeholder="Jumlah rokok" min="1" class="w-full">
-                                </div>
-                                <div>
-                                    <label for="lamaMerokok">Lama merokok (dalam tahun):</label>
-                                    <input type="number" id="lamaMerokok" name="Lama merokok (dalam tahun)" placeholder="Lama merokok dalam tahun" min="0" class="w-full">
-                                </div>
-                            </div>
-
-                            <div id="terpaparAsapRokokField" class="hidden-field mt-4">
-                                <label for="terpaparAsapRokok">Terpapar Asap Rokok Orang Lain:</label>
-                                <select id="terpaparAsapRokok" name="Terpapar Asap Rokok Orang Lain" class="w-full">
-                                    <option value="">-- Pilih --</option>
-                                    <option value="Ya">Ya</option>
-                                    <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                    </div>
-
-                        <div>
-                            <label for="risikoHepatitisB">Risiko Hepatitis B:</label>
-                            <select id="risikoHepatitisB" name="Risiko Hepatitis B" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div id="aktivitasFisikKuesionerField" class="hidden-field">
-                            <label for="aktivitasFisikKuesioner">Aktivitas Fisik (kelas 4-6):</label>
-                            <select id="aktivitasFisikKuesioner" name="Aktivitas Fisik (kelas 4-6)" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya" selected>Ya</option>
-                                <option value="Tidak">Tidak</option>
-                            </select>
-                        </div>
-                        <div id="parQChildField" class="hidden-field">
-                            <label for="parQChild">Par Q Child (kelas 4-6):</label>
-                            <select id="parQChild" name="Par Q Child (kelas 4-6)" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div id="imunisasiKuesionerField" class="hidden-field">
-                            <label for="imunisasiKuesioner">Riwayat Imunisasi Rutin Lengkap:</label>
-                            <select id="imunisasiKuesioner" name="Riwayat Imunisasi Rutin Lengkap" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya" selected>Ya</option>
-                                <option value="Tidak">Tidak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="risikoFrambusia">Risiko Frambusia:</label>
-                            <select id="risikoFrambusia" name="Risiko Frambusia" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="risikoKusta">Risiko Kusta:</label>
-                            <select id="risikoKusta" name="Risiko Kusta" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="risikoScabies">Risiko Scabies:</label>
-                            <select id="risikoScabies" name="Risiko Scabies" class="w-full">
-                                <option value="">-- Pilih --</option>
-                            <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="risikoMalaria">Risiko Malaria (khusus daerah endemis):</label>
-                            <select id="risikoMalaria" name="Risiko Malaria khusus daerah endemis*" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Hasil Pemeriksaan Fisik</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="tekananDarahSistolik">Tekanan Darah Sistolik (mmHg):</label>
-                            <input type="number" id="tekananDarahSistolik" name="Tekanan Darah Sistolik (mmHg)" placeholder="Sistolik" class="w-full">
-                        </div>
-                        <div>
-                            <label for="tekananDarahDiastolik">Tekanan Darah Diastolik (mmHg):</label>
-                            <input type="number" id="tekananDarahDiastolik" name="Tekanan Darah Diastolik (mmHg)" placeholder="Diastolik" class="w-full">
-                        </div>
-                        <div>
-                            <label for="klasifikasiTekananDarah">Klasifikasi Tekanan Darah:</label>
-                            <select id="klasifikasiTekananDarah" name="Klasifikasi Tekanan Darah" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Normal <90/60 mmHg dan <95 persentil">Normal &lt;90/60 mmHg dan &lt;95 persentil</option>
-                                <option value="Pre-hipertensi Sistolik 90-120 mmHg dan/atau Diastolik 60-80 mmHg atau >=90 persentil dan <95 persentil">Pre-hipertensi Sistolik 90-120 mmHg dan/atau Diastolik 60-80 mmHg atau &gt;=90 persentil dan &lt;95 persentil</option>
-                                <option value="Hipertensi tingkat 1 Sistolik 120-139 mmHg dan/atau Diastolik 80-89 mmHg atau >=95 persentil dan <99 persentil + 5 mmHg">Hipertensi tingkat 1 Sistolik 120-139 mmHg dan/atau Diastolik 80-89 mmHg atau &gt;=95 persentil dan &lt;99 persentil + 5 mmHg</option>
-                                <option value="Hipertensi tingkat 2 >=140/90 mmHg atau >=99 persentil + 5 mmHg">Hipertensi tingkat 2 &gt;=140/90 mmHg atau &gt;=99 persentil + 5 mmHg</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="tinggiBadan">Tinggi Badan (cm):</label>
-                            <input type="number" id="tinggiBadan" name="Tinggi Badan" placeholder="Tinggi dalam cm" class="w-full">
-                        </div>
-                        <div>
-                            <label for="beratBadan">Berat Badan (kg):</label>
-                            <input type="number" id="beratBadan" name="Berat Badan" placeholder="Berat dalam kg" class="w-full">
-                        </div>
-                        <div>
-                            <label for="imt">IMT:</label>
-                            <input type="text" id="imt" name="IMT" placeholder="IMT akan terisi otomatis" readonly class="w-full bg-gray-100 cursor-not-allowed">
-                        </div>
-                        <div>
-                            <label for="penilaianStatusGizi">Penilaian Status Gizi:</label>
-                            <select id="penilaianStatusGizi" name="Penilaian Status Gizi" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Gizi Buruk <-3SD">Gizi Buruk &lt;-3SD</option>
-                                <option value="Gizi Kurang -3SD s/d <-2SD">Gizi Kurang -3SD s/d &lt;-2SD</option>
-                                <option value="Normal -2SD s/d +1SD">Normal -2SD s/d +1SD</option>
-                                <option value="Gizi Lebih >+1SD s/d +2SD">Gizi Lebih &gt;+1SD s/d +2SD</option>
-                                <option value="Obesitas >+2SD">Obesitas &gt;+2SD</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="karies">Karies:</label>
-                            <select id="karies" name="Karies" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="masalahLainnyaGigi">Masalah Lainnya (Gigi dan Gusi):</label>
-                            <input type="text" id="masalahLainnyaGigi" name="Masalah lainnya" placeholder="Masalah lain pada gigi/gusi" class="w-full">
-                        </div>
-                        <div>
-                            <label for="mataLuar">Mata Luar:</label>
-                            <select id="mataLuar" name="Mata Luar" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Mata sehat" selected>Mata sehat</option>
-                                <option value="Mata tidak sehat">Mata tidak sehat</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="gangguanTajamPenglihatan">Gangguan Tajam Penglihatan:</label>
-                            <select id="gangguanTajamPenglihatan" name="Gangguan Tajam Penglihatan" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Normal: Visus 6/6 - 6/9" selected>Normal: Visus 6/6 - 6/9</option>
-                                <option value="Gangguan Penglihatan (visus <6/9)">Gangguan Penglihatan (visus &lt;6/9)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="infeksiTelinga">Infeksi Telinga:</label>
-                            <select id="infeksiTelinga" name="Infeksi (Telinga)" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="serumen">Serumen:</label>
-                            <select id="serumen" name="Serumen" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
-                                <option value="Tidak" selected>Tidak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="gangguanTajamPendengaran">Gangguan Tajam Pendengaran:</label>
-                            <select id="gangguanTajamPendengaran" name="Gangguan Tajam Pendengaran" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Dapat mengulang kata lebih dari 80% (minimal 4 dari 5)" selected>Dapat mengulang kata lebih dari 80% (minimal 4 dari 5)</option>
-                                <option value="Tidak dapat mengulang kata lebih dari 80% (kurang dari 4 dari 5)">Tidak dapat mengulang kata lebih dari 80% (kurang dari 4 dari 5)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="waktuKebugaranJasmani">Waktu Kebugaran Jasmani:</label>
-                            <input type="text" id="waktuKebugaranJasmani" name="Waktu Kebugaran Jasmani" placeholder="Contoh: 10 menit" class="w-full">
-                        </div>
-                        <div>
-                            <label for="kebugaranJasmani">Kebugaran Jasmani:</label>
-                            <select id="kebugaranJasmani" name="Kebugaran Jasmani" class="w-full">
-                                <option value="">-- Pilih --</option>
-                                <option value="Baik sekali/ Baik" selected>Baik sekali/ Baik</option>
-                                <option value="Cukup">Cukup</option>
-                                <option value="Kurang/Kurang sekali">Kurang/Kurang sekali</option>
-                            </select>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Kesimpulan</legend>
-                    <div>
-                        <label for="kesimpulan">Kesimpulan:</label>
-                        <select id="kesimpulan" name="Kesimpulan" class="w-full">
-                            <option value="">-- Pilih --</option>
-                            <option value="Rujuk">Rujuk</option>
-                            <option value="Tidak Rujuk" selected>Tidak Rujuk</option>
+                <div class="flex flex-col sm:flex-row gap-4 mb-6 items-center">
+                    <div class="w-full sm:w-1/2">
+                        <label for="downloadSekolahSelect" class="block text-sm font-medium text-gray-700">Pilih Sekolah</label>
+                        <select id="downloadSekolahSelect" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="all">Semua Sekolah</option>
                         </select>
                     </div>
-                </fieldset>
+                    <div class="w-full sm:w-1/4">
+                        <label for="downloadKelasSelect" class="block text-sm font-medium text-gray-700">Pilih Kelas</label>
+                        <select id="downloadKelasSelect" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="all">Semua Kelas</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="w-full sm:w-1/4 self-end mt-4 sm:mt-0">
+                        <button onclick="downloadCSV()" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            <i class="fa-solid fa-download mr-2"></i>Download CSV
+                        </button>
+                    </div>
+                </div>
 
-                <button type="submit" class="w-full py-3" id="submitButton">Simpan Data</button>
-                <button
-                    type="button"
-                    onclick="showView('list')"
-                    class="w-full py-3 mt-4 bg-gray-500 hover:bg-gray-700"
-                >
-                    Kembali ke Daftar
-                </button>
-            </form>
-        </div>
-
-        <div id="messageModal" class="modal">
-            <div class="modal-content">
-                <span class="close-button">&times;</span>
-                <p id="messageText" class="text-lg font-semibold text-gray-800"></p>
-                <div class="loading-spinner" id="loadingSpinner"></div>
+                <div id="loadingGlobalDataMessage" class="text-center text-gray-500 py-10 hidden">
+                    <i class="fa-solid fa-spinner fa-spin text-6xl mb-4"></i>
+                    <p class="text-lg">Memuat data...</p>
+                </div>
+                <div id="noGlobalDataMessage" class="text-center text-gray-500 py-10 hidden">
+                    <i class="fa-solid fa-exclamation-circle text-6xl mb-4"></i>
+                    <p class="text-lg">Tidak ada data rekap yang tersedia.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="globalStudentTable" class="w-full text-left table-auto hidden">
+                        <thead class="bg-gray-50 text-gray-600 text-sm font-semibold uppercase tracking-wider">
+                            <tr>
+                                <th class="py-3 px-4">No</th>
+                                <th class="py-3 px-4">Sekolah</th>
+                                <th class="py-3 px-4">Kelas</th>
+                                <th class="py-3 px-4">Jumlah Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="globalStudentTableBody" class="bg-white divide-y divide-gray-200 text-gray-700">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="nav-buttons">
-        <button id="listViewBtn" class="active" onclick="showView('list')">Daftar Data Saya</button>
-        <button id="rekapViewBtn" onclick="showView('rekap')">Rekap Data Global</button>
-    </div>
+    </main>
 
-    <script>
+    <footer class="bg-white text-gray-600 text-center py-4 text-sm mt-8">
+        &copy; 2025 Aplikasi Skrining Kesehatan Sekolah. Dibuat dengan &hearts; oleh Bahar-sidrap.
+    </footer>
+
+<script>
     // URL Google Apps Script Web App Anda untuk MENGIRIM data (doPost)
     const REKAP_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8Vjz3Pc_fQsM73oH_5v5fQAP55PkMtC7sqMTvn2m-Xyk2i4Vx0gF9FXAUQApojcU-Yw/exec?action=getGlobalData';
     const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8Vjz3Pc_fQsM73oH_5v5fQAP55PkMtC7sqMTvn2m-Xyk2i4Vx0gF9FXAUQApojcU-Yw/exec';
 
     // Variabel global untuk menyimpan data mentah yang diambil dari Google Sheets
     let globalRawData = [];
-    // Variabel untuk melacak data yang sedang diedit
+    // Variabel untuk melacak timestamp dari data yang sedang diedit
     let editingTimestamp = null;
-
+    // Variabel untuk menyimpan referensi elemen DOM yang sering digunakan
+    const dom = {
+        messageModal: document.getElementById('messageModal'),
+        messageText: document.getElementById('messageText'),
+        loadingSpinner: document.getElementById('loadingSpinner'),
+        formViewBtn: document.getElementById('formViewBtn'),
+        listViewBtn: document.getElementById('listViewBtn'),
+        rekapViewBtn: document.getElementById('rekapViewBtn'),
+        dataSiswaForm: document.getElementById('dataSiswaForm'),
+        submitButton: document.getElementById('submitButton'),
+        kelasSelect: document.getElementById('kelas'),
+        merokokSelect: document.getElementById('merokokDalam1TahunTerakhir'),
+        merokokDetailFields: document.getElementById('merokokDetailFields'),
+        myStudentTableBody: document.getElementById('myStudentTableBody'),
+        myStudentTable: document.getElementById('myStudentTable'),
+        noMyDataMessage: document.getElementById('noMyDataMessage'),
+        searchInput: document.getElementById('searchInput'),
+        globalStudentTableBody: document.getElementById('globalStudentTableBody'),
+        globalStudentTable: document.getElementById('globalStudentTable'),
+        noGlobalDataMessage: document.getElementById('noGlobalDataMessage'),
+        loadingGlobalDataMessage: document.getElementById('loadingGlobalDataMessage'),
+        downloadSekolahSelect: document.getElementById('downloadSekolahSelect'),
+        downloadKelasSelect: document.getElementById('downloadKelasSelect'),
+    };
+    
     // Fungsi untuk menampilkan pesan kustom
     function showMessage(message, isLoading = false) {
-        const modal = document.getElementById('messageModal');
-        const messageText = document.getElementById('messageText');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-
-        messageText.textContent = message;
+        dom.messageText.textContent = message;
         if (isLoading) {
-            loadingSpinner.style.display = 'block';
+            dom.loadingSpinner.classList.remove('hidden');
         } else {
-            loadingSpinner.style.display = 'none';
+            dom.loadingSpinner.classList.add('hidden');
         }
-        modal.style.display = 'flex'; // Use flex to center content
+        dom.messageModal.style.display = 'flex';
     }
 
     // Fungsi untuk menyembunyikan pesan kustom
     function hideMessage() {
-        const modal = document.getElementById('messageModal');
-        modal.style.display = 'none';
+        dom.messageModal.style.display = 'none';
     }
 
     // Tutup modal ketika tombol close diklik
@@ -754,41 +587,35 @@
 
     // Tutup modal ketika mengklik di luar area modal content
     window.addEventListener('click', (event) => {
-        const messageModal = document.getElementById('messageModal');
-        if (event.target === messageModal) {
+        if (event.target === dom.messageModal) {
             hideMessage();
         }
     });
 
-    // Fungsi untuk menghitung IMT
+    // Fungsi untuk mengotomatisasi perhitungan
     function calculateIMT() {
         const tinggiBadan = parseFloat(document.getElementById('tinggiBadan').value);
         const beratBadan = parseFloat(document.getElementById('beratBadan').value);
         const imtInput = document.getElementById('imt');
-
         if (tinggiBadan > 0 && beratBadan > 0) {
             const tinggiMeters = tinggiBadan / 100;
             const imt = beratBadan / (tinggiMeters * tinggiMeters);
-            imtInput.value = imt.toFixed(2); // Tampilkan 2 angka di belakang koma
-            calculateStatusGizi(imt); // Trigger status gizi calculation
+            imtInput.value = imt.toFixed(2);
+            calculateStatusGizi(imt);
         } else {
             imtInput.value = '';
-            calculateStatusGizi(null); // Clear status gizi if IMT is not valid
+            calculateStatusGizi(null);
         }
     }
 
-    // Fungsi untuk menghitung usia berdasarkan tanggal lahir
     function calculateAge() {
         const tanggalLahirInput = document.getElementById('tanggalLahir').value;
         const usiaInput = document.getElementById('usia');
-
         if (tanggalLahirInput) {
             const birthDate = new Date(tanggalLahirInput);
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
             const monthDifference = today.getMonth() - birthDate.getMonth();
-
-            // Kurangi 1 jika ulang tahun belum tercapai di tahun ini
             if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
                 age--;
             }
@@ -798,46 +625,35 @@
         }
     }
 
-    // Fungsi untuk mengotomatiskan Penilaian Status Gizi
     function calculateStatusGizi(imtValue) {
         const statusGiziSelect = document.getElementById('penilaianStatusGizi');
         if (imtValue === null || isNaN(imtValue)) {
-            statusGiziSelect.value = ''; // Reset jika IMT tidak valid
+            statusGiziSelect.value = '';
             return;
         }
-
-        // --- PENTING: Ganti rentang IMT ini dengan nilai persentil yang akurat
-        //              berdasarkan usia dan jenis kelamin anak untuk penggunaan klinis.
-        //              Ini hanyalah contoh rentang absolut.
-        if (imtValue < 14) { // Contoh: Gizi Buruk
+        if (imtValue < 14) {
             statusGiziSelect.value = 'Gizi Buruk <-3SD';
-        } else if (imtValue >= 14 && imtValue < 16) { // Contoh: Gizi Kurang
+        } else if (imtValue >= 14 && imtValue < 16) {
             statusGiziSelect.value = 'Gizi Kurang -3SD s/d <-2SD';
-        } else if (imtValue >= 16 && imtValue <= 20) { // Contoh: Normal
+        } else if (imtValue >= 16 && imtValue <= 20) {
             statusGiziSelect.value = 'Normal -2SD s/d +1SD';
-        } else if (imtValue > 20 && imtValue <= 23) { // Contoh: Gizi Lebih
+        } else if (imtValue > 20 && imtValue <= 23) {
             statusGiziSelect.value = 'Gizi Lebih >+1SD s/d +2SD';
-        } else if (imtValue > 23) { // Contoh: Obesitas
+        } else if (imtValue > 23) {
             statusGiziSelect.value = 'Obesitas >+2SD';
         } else {
-            statusGiziSelect.value = ''; // Default jika tidak masuk kategori
+            statusGiziSelect.value = '';
         }
     }
 
-    // Fungsi untuk mengotomatiskan Klasifikasi Tekanan Darah
     function calculateKlasifikasiTekananDarah() {
         const sistolik = parseFloat(document.getElementById('tekananDarahSistolik').value);
         const diastolik = parseFloat(document.getElementById('tekananDarahDiastolik').value);
         const klasifikasiSelect = document.getElementById('klasifikasiTekananDarah');
-
         if (isNaN(sistolik) || isNaN(diastolik)) {
-            klasifikasiSelect.value = ''; // Reset jika input tidak valid
+            klasifikasiSelect.value = '';
             return;
         }
-
-        // --- PENTING: Ganti logika ini dengan klasifikasi berdasarkan persentil
-        //              tekanan darah anak sesuai usia, jenis kelamin, dan tinggi badan.
-        //              Ini hanyalah contoh rentang absolut berdasarkan deskripsi di tabel.
         if (sistolik < 90 && diastolik < 60) {
             klasifikasiSelect.value = 'Normal <90/60 mmHg dan <95 persentil';
         } else if ((sistolik >= 90 && sistolik <= 120) || (diastolik >= 60 && diastolik <= 80)) {
@@ -847,75 +663,42 @@
         } else if (sistolik >= 140 || diastolik >= 90) {
             klasifikasiSelect.value = 'Hipertensi tingkat 2 >=140/90 mmHg atau >=99 persentil + 5 mmHg';
         } else {
-            klasifikasiSelect.value = ''; // Default jika tidak masuk kategori
+            klasifikasiSelect.value = '';
         }
     }
-
-    // Event listener untuk perubahan tinggi dan berat badan (akan memicu IMT dan Status Gizi)
-    document.getElementById('tinggiBadan').addEventListener('input', calculateIMT);
-    document.getElementById('beratBadan').addEventListener('input', calculateIMT);
-
-    // Event listener untuk perubahan tekanan darah (akan memicu Klasifikasi Tekanan Darah)
-    document.getElementById('tekananDarahSistolik').addEventListener('input', calculateKlasifikasiTekananDarah);
-    document.getElementById('tekananDarahDiastolik').addEventListener('input', calculateKlasifikasiTekananDarah);
-
-    // Event listener untuk perubahan tanggal lahir
-    document.getElementById('tanggalLahir').addEventListener('change', calculateAge);
-
+    
     // Fungsi untuk menampilkan/menyembunyikan pertanyaan berdasarkan kelas
-    document.getElementById('kelas').addEventListener('change', function() {
-        const selectedClass = parseInt(this.value);
+    function toggleConditionalFields() {
+        const selectedClass = parseInt(dom.kelasSelect.value);
+        const conditionalFields = ['kesehatanReproduksiField', 'merokokContainer', 'terpaparAsapRokokField', 'aktivitasFisikKuesionerField', 'parQChildField', 'imunisasiKuesionerField'];
 
-        // Elemen-elemen yang harus disembunyikan/ditampilkan
-        const kesehatanReproduksiField = document.getElementById('kesehatanReproduksiField');
-        const merokokContainer = document.getElementById('merokokContainer');
-        const merokokDetailFields = document.getElementById('merokokDetailFields');
-        const terpaparAsapRokokField = document.getElementById('terpaparAsapRokokField');
-        const aktivitasFisikKuesionerField = document.getElementById('aktivitasFisikKuesionerField');
-        const parQChildField = document.getElementById('parQChildField');
-        const imunisasiKuesionerField = document.getElementById('imunisasiKuesionerField');
-
-        // Sembunyikan semua secara default
-        kesehatanReproduksiField.classList.add('hidden-field');
-        merokokContainer.classList.add('hidden-field');
-        merokokDetailFields.classList.add('hidden-field');
-        terpaparAsapRokokField.classList.add('hidden-field');
-        aktivitasFisikKuesionerField.classList.add('hidden-field');
-        parQChildField.classList.add('hidden-field');
-        imunisasiKuesionerField.classList.add('hidden-field');
-
-        // Tampilkan jika kelas 4, 5, atau 6
-        if (selectedClass >= 4 && selectedClass <= 6) {
-            kesehatanReproduksiField.classList.remove('hidden-field');
-            merokokContainer.classList.remove('hidden-field');
-            terpaparAsapRokokField.classList.remove('hidden-field');
-            aktivitasFisikKuesionerField.classList.remove('hidden-field');
-            parQChildField.classList.remove('hidden-field');
-            imunisasiKuesionerField.classList.remove('hidden-field');
-            document.getElementById('merokokDalam1TahunTerakhir').dispatchEvent(new Event('change'));
-        }
-    });
-
-    // Event listener untuk pertanyaan "Merokok dalam 1 tahun terakhir"
-    document.getElementById('merokokDalam1TahunTerakhir').addEventListener('change', function() {
-        const merokokValue = this.value;
-        const merokokDetailFields = document.getElementById('merokokDetailFields');
-
-        if (merokokValue === 'Ya') {
-            merokokDetailFields.classList.remove('hidden-field');
+        conditionalFields.forEach(fieldId => {
+            const element = document.getElementById(fieldId);
+            if (element) {
+                if (selectedClass >= 4 && selectedClass <= 6) {
+                    element.classList.remove('hidden');
+                } else {
+                    element.classList.add('hidden');
+                }
+            }
+        });
+        
+        // Atur ulang visibilitas detail merokok secara spesifik
+        const merokokValue = dom.merokokSelect.value;
+        if (selectedClass >= 4 && selectedClass <= 6 && merokokValue === 'Ya') {
+            dom.merokokDetailFields.classList.remove('hidden');
         } else {
-            merokokDetailFields.classList.add('hidden-field');
+            dom.merokokDetailFields.classList.add('hidden');
         }
-    });
-
+    }
+    
     // Fungsi untuk menyimpan data ke Local Storage
     function saveDataToLocalStorage(data) {
         try {
             let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
             storedData.push(data);
             localStorage.setItem('formDataSD', JSON.stringify(storedData));
-            console.log('Data berhasil disimpan ke Local Storage:', data); // Debugging
-            showMessage('Data berhasil disimpan secara offline! Akan disinkronkan saat online.');
+            showMessage('Data berhasil disimpan secara offline!');
         } catch (error) {
             console.error('Gagal menyimpan data ke Local Storage:', error);
             showMessage('Terjadi kesalahan saat menyimpan data secara offline.');
@@ -926,19 +709,15 @@
     async function sendDataToGoogleSheets(data, retries = 3, delay = 1000) {
         for (let i = 0; i < retries; i++) {
             try {
-                const response = await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+                await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Penting untuk Google Apps Script Web App
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data),
                 });
-
-                console.log('Data berhasil dikirim ke Google Sheets (asumsi berhasil karena no-cors mode).');
                 return true;
             } catch (error) {
-                console.error(`Percobaan ${i + 1} gagal mengirim data ke Google Sheets:`, error);
+                console.error(`Percobaan ${i + 1} gagal mengirim data:`, error);
                 if (i < retries - 1) {
                     await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
                 }
@@ -947,19 +726,16 @@
         return false;
     }
 
-    // --- FUNGSI SINKRONISASI BARU (DIUBAH) ---
+    // Fungsi sinkronisasi data
     async function syncDataToGoogleSheets() {
         let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
-        if (storedData.length === 0) {
-            return;
-        }
+        if (storedData.length === 0) return;
         
         showMessage('Menyinkronkan data...', true);
         let updatedData = [];
         let successfulSyncs = 0;
 
         for (const item of storedData) {
-            // Hanya kirim data yang belum disinkronkan
             if (!item.isSynced) {
                 const success = await sendDataToGoogleSheets(item);
                 if (success) {
@@ -970,17 +746,14 @@
             updatedData.push(item);
         }
         
-        // Simpan kembali semua data (termasuk yang sudah disinkronkan) ke Local Storage
         localStorage.setItem('formDataSD', JSON.stringify(updatedData));
         
         if (successfulSyncs > 0) {
             showMessage(`Sinkronisasi selesai. ${successfulSyncs} data berhasil dikirim.`);
         } else {
-            hideMessage(); // Sembunyikan notifikasi jika tidak ada data baru yang berhasil disinkronkan
+            hideMessage();
         }
-
-        console.log('Data setelah sinkronisasi:', updatedData);
-        loadMyDataList(); // Muat ulang daftar setelah sinkronisasi
+        loadMyDataList();
     }
 
     // Cek status online dan panggil sinkronisasi secara berkala
@@ -988,26 +761,15 @@
         if (navigator.onLine) {
             let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
             const unsyncedDataExists = storedData.some(item => !item.isSynced);
-            
             if (unsyncedDataExists) {
-                console.log('Online. Mencoba menyinkronkan data...');
                 syncDataToGoogleSheets();
-            } else {
-                console.log('Online. Tidak ada data offline yang perlu disinkronkan.');
             }
-        } else {
-            console.log('Offline. Sinkronisasi ditunda.');
         }
     }
-
-    // Panggil checkOnlineStatusAndSync setiap 10 detik
-    setInterval(checkOnlineStatusAndSync, 10000);
-
-    // Fungsi untuk mereset formulir ke nilai default (termasuk nilai "normal" yang sudah ditentukan)
+    
+    // Fungsi untuk mereset formulir
     function resetFormToDefaults() {
-        document.getElementById('dataSiswaForm').reset(); // Reset HTML form elements
-
-        // Explicitly set default values for dropdowns
+        dom.dataSiswaForm.reset();
         document.getElementById('risikoTuberkulosis').value = 'Tidak';
         document.getElementById('risikoDiabetesMellitus').value = 'Tidak';
         document.getElementById('risikoKesehatanJiwa').value = 'Tidak Ada';
@@ -1026,33 +788,26 @@
         document.getElementById('penilaianStatusGizi').value = '';
         document.getElementById('karies').value = 'Tidak';
         document.getElementById('mataLuar').value = 'Mata sehat';
-        document.getElementById('gangguanTajam Penglihatan').value = 'Normal: Visus 6/6 - 6/9';
+        document.getElementById('gangguanTajamPenglihatan').value = 'Normal: Visus 6/6 - 6/9';
         document.getElementById('infeksiTelinga').value = 'Tidak';
         document.getElementById('serumen').value = 'Tidak';
-        document.getElementById('gangguanTajam Pendengaran').value = 'Dapat mengulang kata lebih dari 80% (minimal 4 dari 5)';
+        document.getElementById('gangguanTajamPendengaran').value = 'Dapat mengulang kata lebih dari 80% (minimal 4 dari 5)';
         document.getElementById('kebugaranJasmani').value = 'Baik sekali/ Baik';
         document.getElementById('kesimpulan').value = 'Tidak Rujuk';
 
-        // Reset visibilitas field kondisional
-        document.getElementById('kesehatanReproduksiField').classList.add('hidden-field');
-        document.getElementById('merokokContainer').classList.add('hidden-field');
-        document.getElementById('merokokDetailFields').classList.add('hidden-field');
-        document.getElementById('terpaparAsapRokokField').classList.add('hidden-field');
-        document.getElementById('aktivitasFisikKuesionerField').classList.add('hidden-field');
-        document.getElementById('parQChildField').classList.add('hidden-field');
-        document.getElementById('imunisasiKuesionerField').classList.add('hidden-field');
-        // Reset nilai input teks/angka
         document.getElementById('imt').value = '';
         document.getElementById('usia').value = '';
         document.getElementById('tekananDarahSistolik').value = '';
         document.getElementById('tekananDarahDiastolik').value = '';
         document.getElementById('waktuKebugaranJasmani').value = '';
-        document.getElementById('namaSekolah').value = ''; // Reset nama sekolah dropdown
-        document.getElementById('kelas').value = ''; // Reset kelas dropdown
+        document.getElementById('namaSekolah').value = '';
+        document.getElementById('kelas').value = '';
+        
+        toggleConditionalFields(); // Panggil ini untuk menyembunyikan field kondisional
     }
 
     // Event listener untuk submit formulir
-    document.getElementById('dataSiswaForm').addEventListener('submit', async function(e) {
+    dom.dataSiswaForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const formData = new FormData(this);
@@ -1061,7 +816,6 @@
             data[key] = value;
         }
 
-        // Menambahkan tanda petik di depan NISN, NIK, dan No HP untuk memaksa format teks di Google Sheets
         if (data['NISN'] && data['NISN'].length > 0) {
             data['NISN'] = `'` + data['NISN'];
         }
@@ -1072,25 +826,22 @@
             data['No. HP'] = `'` + data['No. HP'];
         }
 
-        // Tambahkan atau perbarui data
         let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
         
         if (editingTimestamp !== null) {
-            // Mode edit: timpa data lama
             const indexToUpdate = storedData.findIndex(item => item.timestamp === editingTimestamp);
             if (indexToUpdate !== -1) {
                 const oldTimestamp = storedData[indexToUpdate].timestamp;
-                data['timestamp'] = oldTimestamp; // Pertahankan timestamp lama
-                data['isSynced'] = false; // Set kembali ke false agar disinkronkan
+                data['timestamp'] = oldTimestamp;
+                data['isSynced'] = false;
                 storedData[indexToUpdate] = data;
-                showMessage('Data berhasil diperbarui secara offline! Akan disinkronkan saat online.');
+                showMessage('Data berhasil diperbarui secara offline!');
             }
         } else {
-            // Mode tambah baru
             data['isSynced'] = false;
             data['timestamp'] = new Date().toISOString();
             storedData.push(data);
-            showMessage('Data berhasil disimpan secara offline! Akan disinkronkan saat online.');
+            showMessage('Data berhasil disimpan secara offline!');
         }
 
         localStorage.setItem('formDataSD', JSON.stringify(storedData));
@@ -1099,18 +850,18 @@
             await syncDataToGoogleSheets();
         }
 
-        resetFormToDefaults(); // Panggil fungsi reset baru
-        loadMyDataList(); // Muat ulang daftar data saya
-        showView('list'); // Kembali ke tampilan daftar data saya
+        resetFormToDefaults();
+        loadMyDataList();
+        showView('list');
     });
     
-    // --- FUNGSI BARU: Pencarian data ---
+    // Fungsi Pencarian data
     function searchMyData() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const searchTerm = dom.searchInput.value.toLowerCase();
         let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
 
         if (searchTerm === '') {
-            loadMyDataList(); // Tampilkan semua data jika kolom pencarian kosong
+            loadMyDataList();
             return;
         }
 
@@ -1118,41 +869,30 @@
             data.Nama.toLowerCase().includes(searchTerm)
         );
         
-        loadMyDataList(filteredData); // Tampilkan data yang difilter
+        loadMyDataList(filteredData);
     }
-
-    // Tambahkan event listener untuk kolom pencarian
-    document.getElementById('searchInput').addEventListener('input', searchMyData);
-
-
-    // --- Fungsi untuk memuat dan menampilkan data dari Local Storage (Daftar Data Saya) ---
+    
+    // Fungsi untuk memuat dan menampilkan data dari Local Storage
     function loadMyDataList(dataToDisplay = null) {
-        const myStudentTableBody = document.getElementById('myStudentTableBody');
-        const myStudentTable = document.getElementById('myStudentTable');
-        const noMyDataMessage = document.getElementById('noMyDataMessage');
-        myStudentTableBody.innerHTML = ''; // Bersihkan tabel
-
+        dom.myStudentTableBody.innerHTML = '';
         const storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
         const displayData = dataToDisplay || storedData;
 
         if (displayData.length === 0) {
-            noMyDataMessage.classList.remove('hidden');
-            myStudentTable.classList.add('hidden');
+            dom.noMyDataMessage.classList.remove('hidden');
+            dom.myStudentTable.classList.add('hidden');
         } else {
-            noMyDataMessage.classList.add('hidden');
-            myStudentTable.classList.remove('hidden');
-
-            // Urutkan data berdasarkan timestamp (terbaru di atas)
+            dom.noMyDataMessage.classList.add('hidden');
+            dom.myStudentTable.classList.remove('hidden');
             displayData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
-            displayData.forEach((data, index) => {
+            displayData.forEach(data => {
                 const statusIcon = data.isSynced
                     ? `<i class="fa-solid fa-circle-check text-green-500" title="Tersimpan di Sheet"></i>`
                     : `<i class="fa-solid fa-circle-check text-gray-400" title="Belum tersimpan"></i>`;
                 
-                // Perbaikan: gunakan timestamp sebagai identifikasi unik
-                const row = myStudentTableBody.insertRow();
-                row.classList.add('hover:bg-gray-100');
+                const row = dom.myStudentTableBody.insertRow();
+                row.classList.add('hover:bg-gray-100', 'cursor-pointer');
                 row.setAttribute('onclick', `editData('${data.timestamp}')`);
                 row.innerHTML = `
                     <td class="py-3 px-4 text-center">${statusIcon}</td>
@@ -1164,221 +904,130 @@
         }
     }
     
-    // --- FUNGSI BARU: Mengisi formulir dengan data yang dipilih ---
+    // Fungsi untuk mengisi formulir dengan data yang dipilih
     function editData(timestamp) {
         let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
-        // Cari data yang benar berdasarkan timestamp
         const dataToEdit = storedData.find(item => item.timestamp === timestamp);
         if (!dataToEdit) return;
 
-        editingTimestamp = timestamp; // Set timestamp data yang sedang diedit
+        editingTimestamp = timestamp;
+        dom.submitButton.textContent = 'Update Data';
 
-        // Ubah teks tombol menjadi 'Update Data'
-        document.getElementById('submitButton').textContent = 'Update Data';
-
-        // Isi semua input formulir dengan data yang ada
         for (const key in dataToEdit) {
             const element = document.getElementById(getFormElementId(key));
             if (element) {
-                if (element.type === 'checkbox') {
-                    element.checked = dataToEdit[key] === 'Ya';
+                if (['NISN', 'NIK', 'No. HP'].includes(key) && typeof dataToEdit[key] === 'string' && dataToEdit[key].startsWith("'")) {
+                    element.value = dataToEdit[key].substring(1);
                 } else {
-                    // Hilangkan tanda petik dari NISN, NIK, No. HP saat ditampilkan
-                    if (['NISN', 'NIK', 'No. HP'].includes(key) && typeof dataToEdit[key] === 'string' && dataToEdit[key].startsWith("'")) {
-                        element.value = dataToEdit[key].substring(1);
-                    } else {
-                        element.value = dataToEdit[key];
-                    }
+                    element.value = dataToEdit[key];
                 }
             }
         }
         
-        // Panggil fungsi untuk menampilkan/menyembunyikan field kondisional
-        const kelasInput = document.getElementById('kelas');
-        if (kelasInput) {
-            // Panggil event change secara manual untuk mengaktifkan logika kondisional
-            kelasInput.dispatchEvent(new Event('change'));
-        }
-
-        showView('form'); // Beralih ke tampilan formulir
+        toggleConditionalFields();
+        showView('form');
     }
 
-    // Fungsi pembantu untuk mencocokkan nama kunci data dengan ID elemen formulir
     function getFormElementId(key) {
         const keyMap = {
-            'Nama Satuan Pendidikan': 'namaSekolah',
-            'Nama': 'nama',
-            'Jenis Kelamin': 'jenisKelamin',
-            'Kelas': 'kelas',
-            'NISN': 'nisn',
-            'NIK': 'nik',
-            'Tempat Lahir': 'tempatLahir',
-            'Tanggal Lahir': 'tanggalLahir',
-            'Usia (Ulang tahun terakhir)': 'usia',
-            'Alamat': 'alamat',
-            'No. HP': 'noHp',
-            'Risiko Tuberkulosis': 'risikoTuberkulosis',
-            'Risiko Diabetes Mellitus': 'risikoDiabetesMellitus',
-            'Risiko Kesehatan Jiwa': 'risikoKesehatanJiwa',
+            'Nama Satuan Pendidikan': 'namaSekolah', 'Nama': 'nama', 'Jenis Kelamin': 'jenisKelamin',
+            'Kelas': 'kelas', 'NISN': 'nisn', 'NIK': 'nik', 'Tempat Lahir': 'tempatLahir',
+            'Tanggal Lahir': 'tanggalLahir', 'Usia (Ulang tahun terakhir)': 'usia', 'Alamat': 'alamat',
+            'No. HP': 'noHp', 'Risiko Tuberkulosis': 'risikoTuberkulosis',
+            'Risiko Diabetes Mellitus': 'risikoDiabetesMellitus', 'Risiko Kesehatan Jiwa': 'risikoKesehatanJiwa',
             'Kesehatan Reproduksi (Kelas 4-6)': 'kesehatanReproduksi',
             'Merokok dalam 1 tahun terakhir': 'merokokDalam1TahunTerakhir',
-            'Jenis rokok yang dikonsumsi': 'jenisRokok',
-            'Jumlah rokok per hari': 'jumlahRokokPerHari',
-            'Lama merokok (dalam tahun)': 'lamaMerokok',
-            'Terpapar Asap Rokok Orang Lain': 'terpaparAsapRokok',
-            'Risiko Hepatitis B': 'risikoHepatitisB',
-            'Aktivitas Fisik (kelas 4-6)': 'aktivitasFisikKuesioner',
-            'Par Q Child (kelas 4-6)': 'parQChild',
-            'Riwayat Imunisasi Rutin Lengkap': 'imunisasiKuesioner',
-            'Risiko Frambusia': 'risikoFrambusia',
-            'Risiko Kusta': 'risikoKusta',
-            'Risiko Scabies': 'risikoScabies',
+            'Jenis rokok yang dikonsumsi': 'jenisRokok', 'Jumlah rokok per hari': 'jumlahRokokPerHari',
+            'Lama merokok (dalam tahun)': 'lamaMerokok', 'Terpapar Asap Rokok Orang Lain': 'terpaparAsapRokok',
+            'Risiko Hepatitis B': 'risikoHepatitisB', 'Aktivitas Fisik (kelas 4-6)': 'aktivitasFisikKuesioner',
+            'Par Q Child (kelas 4-6)': 'parQChild', 'Riwayat Imunisasi Rutin Lengkap': 'imunisasiKuesioner',
+            'Risiko Frambusia': 'risikoFrambusia', 'Risiko Kusta': 'risikoKusta', 'Risiko Scabies': 'risikoScabies',
             'Risiko Malaria khusus daerah endemis*': 'risikoMalaria',
             'Tekanan Darah Sistolik (mmHg)': 'tekananDarahSistolik',
             'Tekanan Darah Diastolik (mmHg)': 'tekananDarahDiastolik',
-            'Klasifikasi Tekanan Darah': 'klasifikasiTekananDarah',
-            'Tinggi Badan': 'tinggiBadan',
-            'Berat Badan': 'beratBadan',
-            'IMT': 'imt',
-            'Penilaian Status Gizi': 'penilaianStatusGizi',
-            'Karies': 'karies',
-            'Masalah lainnya': 'masalahLainnyaGigi',
-            'Mata Luar': 'mataLuar',
-            'Gangguan Tajam Penglihatan': 'gangguanTajamPenglihatan',
-            'Infeksi (Telinga)': 'infeksiTelinga',
-            'Serumen': 'serumen',
-            'Gangguan Tajam Pendengaran': 'gangguanTajamPendengaran',
-            'Waktu Kebugaran Jasmani': 'waktuKebugaranJasmani',
-            'Kebugaran Jasmani': 'kebugaranJasmani',
+            'Klasifikasi Tekanan Darah': 'klasifikasiTekananDarah', 'Tinggi Badan': 'tinggiBadan',
+            'Berat Badan': 'beratBadan', 'IMT': 'imt', 'Penilaian Status Gizi': 'penilaianStatusGizi',
+            'Karies': 'karies', 'Masalah lainnya': 'masalahLainnyaGigi', 'Mata Luar': 'mataLuar',
+            'Gangguan Tajam Penglihatan': 'gangguanTajamPenglihatan', 'Infeksi (Telinga)': 'infeksiTelinga',
+            'Serumen': 'serumen', 'Gangguan Tajam Pendengaran': 'gangguanTajamPendengaran',
+            'Waktu Kebugaran Jasmani': 'waktuKebugaranJasmani', 'Kebugaran Jasmani': 'kebugaranJasmani',
             'Kesimpulan': 'kesimpulan'
         };
         return keyMap[key] || key;
     }
 
-    // --- Fungsi untuk memuat dan menampilkan rekap data global dari Google Sheets (Telah diubah) ---
+    // Fungsi untuk memuat dan menampilkan rekap data global dari Google Sheets
     async function fetchGlobalData() {
-        const loadingGlobalDataMessage = document.getElementById('loadingGlobalDataMessage');
-        const noGlobalDataMessage = document.getElementById('noGlobalDataMessage');
-        
-        document.getElementById('globalStudentTable').classList.add('hidden');
-        noGlobalDataMessage.classList.add('hidden');
-        loadingGlobalDataMessage.classList.remove('hidden'); // Tampilkan pesan loading
+        dom.globalStudentTable.classList.add('hidden');
+        dom.noGlobalDataMessage.classList.add('hidden');
+        dom.loadingGlobalDataMessage.classList.remove('hidden');
 
         try {
-            const response = await fetch(REKAP_WEB_APP_URL, {
-                method: 'GET',
-                mode: 'cors'
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`HTTP error! status: ${response.status}, response: ${errorText}`);
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
+            const response = await fetch(REKAP_WEB_APP_URL, { method: 'GET', mode: 'cors' });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-            console.log('Data global diterima:', data);
-            globalRawData = data; // Simpan data mentah ke variabel global
-
-            loadingGlobalDataMessage.classList.add('hidden');
-            
-            // Panggil fungsi untuk mengisi dropdown sekolah dan memfilter tabel
+            globalRawData = data;
+            dom.loadingGlobalDataMessage.classList.add('hidden');
             populateSchoolDropdown(globalRawData);
-            filterAndDisplayRecap(); // Tampilkan rekap awal
-            
+            filterAndDisplayRecap();
         } catch (error) {
             console.error('Gagal mengambil data global:', error);
-            loadingGlobalDataMessage.classList.add('hidden');
-            noGlobalDataMessage.textContent = `Gagal memuat data global: ${error.message}`;
-            noGlobalDataMessage.classList.remove('hidden');
+            dom.loadingGlobalDataMessage.classList.add('hidden');
+            dom.noGlobalDataMessage.textContent = `Gagal memuat data global: ${error.message}`;
+            dom.noGlobalDataMessage.classList.remove('hidden');
         }
     }
 
-    // Fungsi untuk mengisi dropdown sekolah secara dinamis
     function populateSchoolDropdown(data) {
-        const schoolSelect = document.getElementById('downloadSekolahSelect');
-        schoolSelect.innerHTML = `
-            <option value="all">Semua Sekolah</option>
-            <option value="SDN 1 ARAWA">SDN 1 ARAWA</option>
-            <option value="SDN 2 ARAWA">SDN 2 ARAWA</option>
-            <option value="SDN 3 ARAWA">SDN 3 ARAWA</option>
-            <option value="SDN 4 ARAWA">SDN 4 ARAWA</option>
-            <option value="SDN 5 ARAWA">SDN 5 ARAWA</option>
-            <option value="SDN 6 ARAWA">SDN 6 ARAWA</option>
-            <option value="SDN 7 ARAWA">SDN 7 ARAWA</option>
-            <option value="SDN 8 ARAWA">SDN 8 ARAWA</option>
-            <option value="SDN 9 ARAWA">SDN 9 ARAWA</option>
-            <option value="SDN 10 ARAWA">SDN 10 ARAWA</option>
-            <option value="SDN 1 LAWAWOI">SDN 1 LAWAWOI</option>
-            <option value="SDN 2 LAWAWOI">SDN 2 LAWAWOI</option>
-            <option value="SDN 3 LAWAWOI">SDN 3 LAWAWOI</option>
-            <option value="SDN 4 LAWAWOI">SDN 4 LAWAWOI</option>
-            <option value="SDN 5 LAWAWOI">SDN 5 LAWAWOI</option>
-            <option value="SDN 1 CARAWALI">SDN 1 CARAWALI</option>
-            <option value="SDN 2 CARAWALI">SDN 2 CARAWALI</option>
-            <option value="SDN 3 CARAWALI">SDN 3 CARAWALI</option>
-            <option value="SDN 4 CARAWALI">SDN 4 CARAWALI</option>
-            <option value="SDN 1 LAINUNGAN">SDN 1 LAINUNGAN</option>
-            <option value="SDN 2 LAINUNGAN">SDN 2 LAINUNGAN</option>
-            <option value="SDN 3 LAINUNGAN">SDN 3 LAINUNGAN</option>
-            <option value="SDN 4 LAINUNGAN">SDN 4 LAINUNGAN</option>
-            <option value="SD S IT AL IMAN">SD S IT AL IMAN</option>
-        `; // Reset dropdown
-
+        dom.downloadSekolahSelect.innerHTML = `<option value="all">Semua Sekolah</option>`;
         const uniqueSchools = [...new Set(data.map(item => item['Nama Satuan Pendidikan']))];
         uniqueSchools.forEach(school => {
-            const option = document.createElement('option');
-            option.value = school;
-            option.textContent = school;
-            schoolSelect.appendChild(option);
+            if (school) { // Pastikan nilai tidak kosong
+                const option = document.createElement('option');
+                option.value = school;
+                option.textContent = school;
+                dom.downloadSekolahSelect.appendChild(option);
+            }
         });
     }
-    
-    // --- FUNGSI BARU: Filter dan Tampilkan Data Rekap ---
-    function filterAndDisplayRecap() {
-        const selectedSchool = document.getElementById('downloadSekolahSelect').value;
-        const selectedClass = document.getElementById('downloadKelasSelect').value;
 
-        // Saring data mentah berdasarkan pilihan dropdown
+    function filterAndDisplayRecap() {
+        const selectedSchool = dom.downloadSekolahSelect.value;
+        const selectedClass = dom.downloadKelasSelect.value;
+
         const filteredData = globalRawData.filter(item => {
             const schoolMatch = (selectedSchool === 'all' || item['Nama Satuan Pendidikan'] === selectedSchool);
-            const classMatch = (selectedClass === 'all' || item['Kelas'].toString() === selectedClass);
+            const classMatch = (selectedClass === 'all' || (item['Kelas'] && item['Kelas'].toString() === selectedClass));
             return schoolMatch && classMatch;
         });
         
-        // Lakukan rekapitulasi data yang sudah disaring
         const rekapData = filteredData.reduce((acc, current) => {
-            const key = `${current['Nama Satuan Pendidikan']}-${current['Kelas']}`;
-            if (!acc[key]) {
-                acc[key] = {
-                    'Nama Satuan Pendidikan': current['Nama Satuan Pendidikan'],
-                    'Kelas': current['Kelas'],
-                    'Jumlah Data': 0
-                };
+            if (current['Nama Satuan Pendidikan'] && current['Kelas']) {
+                const key = `${current['Nama Satuan Pendidikan']}-${current['Kelas']}`;
+                if (!acc[key]) {
+                    acc[key] = {
+                        'Nama Satuan Pendidikan': current['Nama Satuan Pendidikan'],
+                        'Kelas': current['Kelas'],
+                        'Jumlah Data': 0
+                    };
+                }
+                acc[key]['Jumlah Data']++;
             }
-            acc[key]['Jumlah Data']++;
             return acc;
         }, {});
 
-        // Tampilkan hasil rekapitulasi ke tabel
         displayRecapTable(rekapData);
     }
-
-    // Fungsi untuk menampilkan data rekapitulasi ke tabel
+    
     function displayRecapTable(rekapData) {
-        const globalStudentTableBody = document.getElementById('globalStudentTableBody');
-        const globalStudentTable = document.getElementById('globalStudentTable');
-        const noGlobalDataMessage = document.getElementById('noGlobalDataMessage');
-
-        globalStudentTableBody.innerHTML = '';
-        
+        dom.globalStudentTableBody.innerHTML = '';
         if (Object.keys(rekapData).length > 0) {
-            globalStudentTable.classList.remove('hidden');
-            noGlobalDataMessage.classList.add('hidden');
+            dom.globalStudentTable.classList.remove('hidden');
+            dom.noGlobalDataMessage.classList.add('hidden');
             let index = 1;
             for (const key in rekapData) {
                 const item = rekapData[key];
-                const row = globalStudentTableBody.insertRow();
+                const row = dom.globalStudentTableBody.insertRow();
                 row.innerHTML = `
                     <td class="py-3 px-4">${index++}</td>
                     <td class="py-3 px-4">${item['Nama Satuan Pendidikan'] || ''}</td>
@@ -1387,30 +1036,23 @@
                 `;
             }
         } else {
-            globalStudentTable.classList.add('hidden');
-            noGlobalDataMessage.textContent = 'Tidak ada data yang cocok dengan filter yang dipilih.';
-            noGlobalDataMessage.classList.remove('hidden');
+            dom.globalStudentTable.classList.add('hidden');
+            dom.noGlobalDataMessage.textContent = 'Tidak ada data yang cocok dengan filter yang dipilih.';
+            dom.noGlobalDataMessage.classList.remove('hidden');
         }
     }
     
-    // --- FUNGSI BARU: Menambahkan event listener ke dropdown untuk memicu filter ---
-    document.getElementById('downloadSekolahSelect').addEventListener('change', filterAndDisplayRecap);
-    document.getElementById('downloadKelasSelect').addEventListener('change', filterAndDisplayRecap);
-
-    // --- FUNGSI BARU UNTUK DOWNLOAD CSV (DIUBAH) ---
     function downloadCSV() {
         if (globalRawData.length === 0) {
             showMessage('Tidak ada data yang dapat diunduh.');
             return;
         }
 
-        const selectedSchool = document.getElementById('downloadSekolahSelect').value;
-        const selectedClass = document.getElementById('downloadKelasSelect').value;
-
-        // Saring data mentah berdasarkan pilihan dropdown
+        const selectedSchool = dom.downloadSekolahSelect.value;
+        const selectedClass = dom.downloadKelasSelect.value;
         const filteredData = globalRawData.filter(item => {
             const schoolMatch = (selectedSchool === 'all' || item['Nama Satuan Pendidikan'] === selectedSchool);
-            const classMatch = (selectedClass === 'all' || item['Kelas'].toString() === selectedClass);
+            const classMatch = (selectedClass === 'all' || (item['Kelas'] && item['Kelas'].toString() === selectedClass));
             return schoolMatch && classMatch;
         });
         
@@ -1419,21 +1061,15 @@
             return;
         }
 
-        // Dapatkan semua header dari objek data pertama, kecuali properti internal seperti isSynced dan timestamp
         const headers = Object.keys(filteredData[0]).filter(key => key !== 'isSynced' && key !== 'timestamp');
-        
-        // Persiapan CSV
-        const csvRows = [];
-        // Buat baris header
-        csvRows.push(headers.map(header => `"${header.replace(/"/g, '""')}"`).join(','));
+        const csvRows = [
+            headers.map(header => `"${header.replace(/"/g, '""')}"`).join(',')
+        ];
 
-        // Buat baris untuk setiap data yang difilter
         for (const item of filteredData) {
             const values = headers.map(header => {
                 const value = item[header];
-                // Handle nilai null, undefined, atau non-string
                 if (value === null || value === undefined) return '""';
-                // Jika nilai adalah string, escape tanda kutip ganda dan tambahkan tanda kutip di sekelilingnya
                 const stringValue = String(value);
                 return `"${stringValue.replace(/"/g, '""')}"`;
             });
@@ -1444,7 +1080,6 @@
         const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         
-        // Buat nama file yang deskriptif
         let fileName = 'data_kuesioner_global';
         if (selectedSchool !== 'all') {
             fileName += `_${selectedSchool.replace(/ /g, '_')}`;
@@ -1454,7 +1089,6 @@
         }
         fileName += '.csv';
 
-        // Buat link download dan picu klik
         const link = document.createElement('a');
         link.setAttribute('href', url);
         link.setAttribute('download', fileName);
@@ -1465,64 +1099,65 @@
         showMessage('File CSV berhasil diunduh.');
     }
 
-
-    // Panggil fungsi inisialisasi saat halaman dimuat
-    window.addEventListener('load', () => {
-        showView('list'); // Tampilkan tampilan daftar data saya secara default
-        checkOnlineStatusAndSync(); // Mulai sinkronisasi data offline
-    });
-    // --- Fungsi untuk mengelola tampilan halaman ---
+    // Fungsi untuk mengelola tampilan halaman
     function showView(viewId) {
-        const views = document.querySelectorAll('.view');
-        views.forEach(view => view.classList.remove('active')); // Sembunyikan semua tampilan
+        document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+        document.querySelectorAll('.nav-buttons button').forEach(button => button.classList.remove('active'));
 
-        const navButtons = document.querySelectorAll('.nav-buttons button');
-        navButtons.forEach(button => button.classList.remove('active')); // Hapus active dari semua tombol nav
-
-        // Tampilkan tampilan yang diminta
         const viewElement = document.getElementById(viewId + 'View');
-        if (viewElement) {
-            viewElement.classList.add('active');
-        }
+        if (viewElement) viewElement.classList.add('active');
         
-        // Perbarui tombol navigasi
         let activeBtnId = '';
         if (viewId === 'list') {
             activeBtnId = 'listViewBtn';
-            editingTimestamp = null; // Reset editing index saat kembali ke daftar
-            document.getElementById('submitButton').textContent = 'Simpan Data';
+            editingTimestamp = null;
+            dom.submitButton.textContent = 'Simpan Data';
         } else if (viewId === 'rekap') {
             activeBtnId = 'rekapViewBtn';
         } else if (viewId === 'form') {
-            // Saat di form, tetap tandai tombol 'Daftar' sebagai aktif
-            activeBtnId = 'listViewBtn';
+            activeBtnId = 'formViewBtn';
         }
         
         const activeBtn = document.getElementById(activeBtnId);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-        }
+        if (activeBtn) activeBtn.classList.add('active');
         
-        // Muat data yang sesuai saat tampilan berubah
         if (viewId === 'list') {
             loadMyDataList();
         } else if (viewId === 'rekap') {
             fetchGlobalData();
         } else if (viewId === 'form') {
             if (editingTimestamp === null) {
-               resetFormToDefaults(); // Pastikan form bersih saat ingin menambah data baru
+               resetFormToDefaults();
             }
-            
         }
     }
 
-    // Inisialisasi tampilan field kondisional saat pertama kali dimuat
+    // Inisialisasi Event Listeners saat DOM dimuat
     document.addEventListener('DOMContentLoaded', () => {
-        // Trigger change event for 'kelas' to set initial visibility of conditional fields
-        // This is handled by resetFormToDefaults now, but keeping it for safety if DOMContentLoaded fires before load
-        // document.getElementById('kelas').dispatchEvent(new Event('change'));
+        // Event listeners untuk perhitungan otomatis
+        document.getElementById('tinggiBadan').addEventListener('input', calculateIMT);
+        document.getElementById('beratBadan').addEventListener('input', calculateIMT);
+        document.getElementById('tanggalLahir').addEventListener('change', calculateAge);
+        document.getElementById('tekananDarahSistolik').addEventListener('input', calculateKlasifikasiTekananDarah);
+        document.getElementById('tekananDarahDiastolik').addEventListener('input', calculateKlasifikasiTekananDarah);
+
+        // Event listeners untuk field kondisional
+        dom.kelasSelect.addEventListener('change', toggleConditionalFields);
+        dom.merokokSelect.addEventListener('change', toggleConditionalFields);
+
+        // Event listener untuk pencarian
+        dom.searchInput.addEventListener('input', searchMyData);
+        
+        // Event listeners untuk filter rekap
+        dom.downloadSekolahSelect.addEventListener('change', filterAndDisplayRecap);
+        dom.downloadKelasSelect.addEventListener('change', filterAndDisplayRecap);
+
+        // Tampilkan tampilan awal
+        showView('form');
+        checkOnlineStatusAndSync();
     });
 
 </script>
+
 </body>
 </html>
