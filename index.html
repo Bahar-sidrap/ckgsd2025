@@ -20,7 +20,7 @@
         }
         .form-container {
             background-color: #ffffff;
-            padding: 2.5rem; /* Increased padding */
+            padding: 1.5rem; /* Increased padding */
             border-radius: 1rem; /* More rounded corners */
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Stronger shadow */
             width: 100%;
@@ -199,16 +199,35 @@
                 width: auto;
             }
         }
+        /* Style untuk baris tabel yang dapat diklik */
+        #myStudentTableBody tr {
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        #myStudentTableBody tr:hover {
+            background-color: #f3f4f6; /* Warna abu-abu muda saat di-hover */
+        }
+        .search-input-container {
+            margin-bottom: 1.5rem;
+        }
     </style>
 </head>
 <body>
     <div class="form-container">
         <div id="listView" class="view active">
-            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Daftar Data Kesehatan Siswa SD (Data Saya)</h1>
-            <div class="flex justify-end items-center mb-6">
+            <h1 class="text-xl font-bold text-center mb-8 text-gray-800">Daftar Data Kesehatan Siswa SD (Data Saya)</h1>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="flex-grow w-full">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Cari nama siswa..."
+                        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                </div>
                 <button
                     onclick="showView('form')"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-2xl leading-none shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-2xl leading-none shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105 md:w-auto w-1/3"
                     title="Tambah Data Baru"
                 >
                     +
@@ -233,7 +252,7 @@
         </div>
 
         <div id="rekapView" class="view">
-            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Rekap Data Kesehatan Siswa SD (Global)</h1>
+            <h1 class="text-xl font-bold text-center mb-8 text-gray-800">Rekap Data Kesehatan Siswa SD (Global)</h1>
             <div class="download-controls">
                 <div class="flex-grow">
                     <label for="downloadSekolahSelect" class="text-sm font-medium text-gray-700">Pilih Sekolah:</label>
@@ -535,7 +554,7 @@
                             <label for="risikoScabies">Risiko Scabies:</label>
                             <select id="risikoScabies" name="Risiko Scabies" class="w-full">
                                 <option value="">-- Pilih --</option>
-                                <option value="Ya">Ya</option>
+                            <option value="Ya">Ya</option>
                                 <option value="Tidak" selected>Tidak</option>
                             </select>
                         </div>
@@ -674,7 +693,7 @@
                     </div>
                 </fieldset>
 
-                <button type="submit" class="w-full py-3">Simpan Data</button>
+                <button type="submit" class="w-full py-3" id="submitButton">Simpan Data</button>
                 <button
                     type="button"
                     onclick="showView('list')"
@@ -700,672 +719,810 @@
     </div>
 
     <script>
-        // URL Google Apps Script Web App Anda untuk MENGIRIM data (doPost)
-        const REKAP_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8Vjz3Pc_fQsM73oH_5v5fQAP55PkMtC7sqMTvn2m-Xyk2i4Vx0gF9FXAUQApojcU-Yw/exec?action=getGlobalData';
-        const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8Vjz3Pc_fQsM73oH_5v5fQAP55PkMtC7sqMTvn2m-Xyk2i4Vx0gF9FXAUQApojcU-Yw/exec';
+    // URL Google Apps Script Web App Anda untuk MENGIRIM data (doPost)
+    const REKAP_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8Vjz3Pc_fQsM73oH_5v5fQAP55PkMtC7sqMTvn2m-Xyk2i4Vx0gF9FXAUQApojcU-Yw/exec?action=getGlobalData';
+    const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8Vjz3Pc_fQsM73oH_5v5fQAP55PkMtC7sqMTvn2m-Xyk2i4Vx0gF9FXAUQApojcU-Yw/exec';
 
-        // Variabel global untuk menyimpan data mentah yang diambil dari Google Sheets
-        let globalRawData = [];
+    // Variabel global untuk menyimpan data mentah yang diambil dari Google Sheets
+    let globalRawData = [];
+    // Variabel untuk melacak data yang sedang diedit
+    let editingTimestamp = null;
 
-        // Fungsi untuk menampilkan pesan kustom
-        function showMessage(message, isLoading = false) {
-            const modal = document.getElementById('messageModal');
-            const messageText = document.getElementById('messageText');
-            const loadingSpinner = document.getElementById('loadingSpinner');
+    // Fungsi untuk menampilkan pesan kustom
+    function showMessage(message, isLoading = false) {
+        const modal = document.getElementById('messageModal');
+        const messageText = document.getElementById('messageText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
 
-            messageText.textContent = message;
-            if (isLoading) {
-                loadingSpinner.style.display = 'block';
-            } else {
-                loadingSpinner.style.display = 'none';
+        messageText.textContent = message;
+        if (isLoading) {
+            loadingSpinner.style.display = 'block';
+        } else {
+            loadingSpinner.style.display = 'none';
+        }
+        modal.style.display = 'flex'; // Use flex to center content
+    }
+
+    // Fungsi untuk menyembunyikan pesan kustom
+    function hideMessage() {
+        const modal = document.getElementById('messageModal');
+        modal.style.display = 'none';
+    }
+
+    // Tutup modal ketika tombol close diklik
+    document.querySelector('#messageModal .close-button').addEventListener('click', hideMessage);
+
+    // Tutup modal ketika mengklik di luar area modal content
+    window.addEventListener('click', (event) => {
+        const messageModal = document.getElementById('messageModal');
+        if (event.target === messageModal) {
+            hideMessage();
+        }
+    });
+
+    // Fungsi untuk menghitung IMT
+    function calculateIMT() {
+        const tinggiBadan = parseFloat(document.getElementById('tinggiBadan').value);
+        const beratBadan = parseFloat(document.getElementById('beratBadan').value);
+        const imtInput = document.getElementById('imt');
+
+        if (tinggiBadan > 0 && beratBadan > 0) {
+            const tinggiMeters = tinggiBadan / 100;
+            const imt = beratBadan / (tinggiMeters * tinggiMeters);
+            imtInput.value = imt.toFixed(2); // Tampilkan 2 angka di belakang koma
+            calculateStatusGizi(imt); // Trigger status gizi calculation
+        } else {
+            imtInput.value = '';
+            calculateStatusGizi(null); // Clear status gizi if IMT is not valid
+        }
+    }
+
+    // Fungsi untuk menghitung usia berdasarkan tanggal lahir
+    function calculateAge() {
+        const tanggalLahirInput = document.getElementById('tanggalLahir').value;
+        const usiaInput = document.getElementById('usia');
+
+        if (tanggalLahirInput) {
+            const birthDate = new Date(tanggalLahirInput);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDifference = today.getMonth() - birthDate.getMonth();
+
+            // Kurangi 1 jika ulang tahun belum tercapai di tahun ini
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
             }
-            modal.style.display = 'flex'; // Use flex to center content
+            usiaInput.value = age;
+        } else {
+            usiaInput.value = '';
+        }
+    }
+
+    // Fungsi untuk mengotomatiskan Penilaian Status Gizi
+    function calculateStatusGizi(imtValue) {
+        const statusGiziSelect = document.getElementById('penilaianStatusGizi');
+        if (imtValue === null || isNaN(imtValue)) {
+            statusGiziSelect.value = ''; // Reset jika IMT tidak valid
+            return;
         }
 
-        // Fungsi untuk menyembunyikan pesan kustom
-        function hideMessage() {
-            const modal = document.getElementById('messageModal');
-            modal.style.display = 'none';
+        // --- PENTING: Ganti rentang IMT ini dengan nilai persentil yang akurat
+        //              berdasarkan usia dan jenis kelamin anak untuk penggunaan klinis.
+        //              Ini hanyalah contoh rentang absolut.
+        if (imtValue < 14) { // Contoh: Gizi Buruk
+            statusGiziSelect.value = 'Gizi Buruk <-3SD';
+        } else if (imtValue >= 14 && imtValue < 16) { // Contoh: Gizi Kurang
+            statusGiziSelect.value = 'Gizi Kurang -3SD s/d <-2SD';
+        } else if (imtValue >= 16 && imtValue <= 20) { // Contoh: Normal
+            statusGiziSelect.value = 'Normal -2SD s/d +1SD';
+        } else if (imtValue > 20 && imtValue <= 23) { // Contoh: Gizi Lebih
+            statusGiziSelect.value = 'Gizi Lebih >+1SD s/d +2SD';
+        } else if (imtValue > 23) { // Contoh: Obesitas
+            statusGiziSelect.value = 'Obesitas >+2SD';
+        } else {
+            statusGiziSelect.value = ''; // Default jika tidak masuk kategori
+        }
+    }
+
+    // Fungsi untuk mengotomatiskan Klasifikasi Tekanan Darah
+    function calculateKlasifikasiTekananDarah() {
+        const sistolik = parseFloat(document.getElementById('tekananDarahSistolik').value);
+        const diastolik = parseFloat(document.getElementById('tekananDarahDiastolik').value);
+        const klasifikasiSelect = document.getElementById('klasifikasiTekananDarah');
+
+        if (isNaN(sistolik) || isNaN(diastolik)) {
+            klasifikasiSelect.value = ''; // Reset jika input tidak valid
+            return;
         }
 
-        // Tutup modal ketika tombol close diklik
-        document.querySelector('#messageModal .close-button').addEventListener('click', hideMessage);
-
-        // Tutup modal ketika mengklik di luar area modal content
-        window.addEventListener('click', (event) => {
-            const messageModal = document.getElementById('messageModal');
-            if (event.target === messageModal) {
-                hideMessage();
-            }
-        });
-
-        // Fungsi untuk menghitung IMT
-        function calculateIMT() {
-            const tinggiBadan = parseFloat(document.getElementById('tinggiBadan').value);
-            const beratBadan = parseFloat(document.getElementById('beratBadan').value);
-            const imtInput = document.getElementById('imt');
-
-            if (tinggiBadan > 0 && beratBadan > 0) {
-                const tinggiMeters = tinggiBadan / 100;
-                const imt = beratBadan / (tinggiMeters * tinggiMeters);
-                imtInput.value = imt.toFixed(2); // Tampilkan 2 angka di belakang koma
-                calculateStatusGizi(imt); // Trigger status gizi calculation
-            } else {
-                imtInput.value = '';
-                calculateStatusGizi(null); // Clear status gizi if IMT is not valid
-            }
+        // --- PENTING: Ganti logika ini dengan klasifikasi berdasarkan persentil
+        //              tekanan darah anak sesuai usia, jenis kelamin, dan tinggi badan.
+        //              Ini hanyalah contoh rentang absolut berdasarkan deskripsi di tabel.
+        if (sistolik < 90 && diastolik < 60) {
+            klasifikasiSelect.value = 'Normal <90/60 mmHg dan <95 persentil';
+        } else if ((sistolik >= 90 && sistolik <= 120) || (diastolik >= 60 && diastolik <= 80)) {
+            klasifikasiSelect.value = 'Pre-hipertensi Sistolik 90-120 mmHg dan/atau Diastolik 60-80 mmHg atau >=90 persentil dan <95 persentil';
+        } else if ((sistolik >= 120 && sistolik <= 139) || (diastolik >= 80 && diastolik <= 89)) {
+            klasifikasiSelect.value = 'Hipertensi tingkat 1 Sistolik 120-139 mmHg dan/atau Diastolik 80-89 mmHg atau >=95 persentil dan <99 persentil + 5 mmHg';
+        } else if (sistolik >= 140 || diastolik >= 90) {
+            klasifikasiSelect.value = 'Hipertensi tingkat 2 >=140/90 mmHg atau >=99 persentil + 5 mmHg';
+        } else {
+            klasifikasiSelect.value = ''; // Default jika tidak masuk kategori
         }
+    }
 
-        // Fungsi untuk menghitung usia berdasarkan tanggal lahir
-        function calculateAge() {
-            const tanggalLahirInput = document.getElementById('tanggalLahir').value;
-            const usiaInput = document.getElementById('usia');
+    // Event listener untuk perubahan tinggi dan berat badan (akan memicu IMT dan Status Gizi)
+    document.getElementById('tinggiBadan').addEventListener('input', calculateIMT);
+    document.getElementById('beratBadan').addEventListener('input', calculateIMT);
 
-            if (tanggalLahirInput) {
-                const birthDate = new Date(tanggalLahirInput);
-                const today = new Date();
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const monthDifference = today.getMonth() - birthDate.getMonth();
+    // Event listener untuk perubahan tekanan darah (akan memicu Klasifikasi Tekanan Darah)
+    document.getElementById('tekananDarahSistolik').addEventListener('input', calculateKlasifikasiTekananDarah);
+    document.getElementById('tekananDarahDiastolik').addEventListener('input', calculateKlasifikasiTekananDarah);
 
-                // Kurangi 1 jika ulang tahun belum tercapai di tahun ini
-                if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
-                }
-                usiaInput.value = age;
-            } else {
-                usiaInput.value = '';
-            }
+    // Event listener untuk perubahan tanggal lahir
+    document.getElementById('tanggalLahir').addEventListener('change', calculateAge);
+
+    // Fungsi untuk menampilkan/menyembunyikan pertanyaan berdasarkan kelas
+    document.getElementById('kelas').addEventListener('change', function() {
+        const selectedClass = parseInt(this.value);
+
+        // Elemen-elemen yang harus disembunyikan/ditampilkan
+        const kesehatanReproduksiField = document.getElementById('kesehatanReproduksiField');
+        const merokokContainer = document.getElementById('merokokContainer');
+        const merokokDetailFields = document.getElementById('merokokDetailFields');
+        const terpaparAsapRokokField = document.getElementById('terpaparAsapRokokField');
+        const aktivitasFisikKuesionerField = document.getElementById('aktivitasFisikKuesionerField');
+        const parQChildField = document.getElementById('parQChildField');
+        const imunisasiKuesionerField = document.getElementById('imunisasiKuesionerField');
+
+        // Sembunyikan semua secara default
+        kesehatanReproduksiField.classList.add('hidden-field');
+        merokokContainer.classList.add('hidden-field');
+        merokokDetailFields.classList.add('hidden-field');
+        terpaparAsapRokokField.classList.add('hidden-field');
+        aktivitasFisikKuesionerField.classList.add('hidden-field');
+        parQChildField.classList.add('hidden-field');
+        imunisasiKuesionerField.classList.add('hidden-field');
+
+        // Tampilkan jika kelas 4, 5, atau 6
+        if (selectedClass >= 4 && selectedClass <= 6) {
+            kesehatanReproduksiField.classList.remove('hidden-field');
+            merokokContainer.classList.remove('hidden-field');
+            terpaparAsapRokokField.classList.remove('hidden-field');
+            aktivitasFisikKuesionerField.classList.remove('hidden-field');
+            parQChildField.classList.remove('hidden-field');
+            imunisasiKuesionerField.classList.remove('hidden-field');
+            document.getElementById('merokokDalam1TahunTerakhir').dispatchEvent(new Event('change'));
         }
+    });
 
-        // Fungsi untuk mengotomatiskan Penilaian Status Gizi
-        function calculateStatusGizi(imtValue) {
-            const statusGiziSelect = document.getElementById('penilaianStatusGizi');
-            if (imtValue === null || isNaN(imtValue)) {
-                statusGiziSelect.value = ''; // Reset jika IMT tidak valid
-                return;
-            }
+    // Event listener untuk pertanyaan "Merokok dalam 1 tahun terakhir"
+    document.getElementById('merokokDalam1TahunTerakhir').addEventListener('change', function() {
+        const merokokValue = this.value;
+        const merokokDetailFields = document.getElementById('merokokDetailFields');
 
-            // --- PENTING: Ganti rentang IMT ini dengan nilai persentil yang akurat
-            //              berdasarkan usia dan jenis kelamin anak untuk penggunaan klinis.
-            //              Ini hanyalah contoh rentang absolut.
-            if (imtValue < 14) { // Contoh: Gizi Buruk
-                statusGiziSelect.value = 'Gizi Buruk <-3SD';
-            } else if (imtValue >= 14 && imtValue < 16) { // Contoh: Gizi Kurang
-                statusGiziSelect.value = 'Gizi Kurang -3SD s/d <-2SD';
-            } else if (imtValue >= 16 && imtValue <= 20) { // Contoh: Normal
-                statusGiziSelect.value = 'Normal -2SD s/d +1SD';
-            } else if (imtValue > 20 && imtValue <= 23) { // Contoh: Gizi Lebih
-                statusGiziSelect.value = 'Gizi Lebih >+1SD s/d +2SD';
-            } else if (imtValue > 23) { // Contoh: Obesitas
-                statusGiziSelect.value = 'Obesitas >+2SD';
-            } else {
-                statusGiziSelect.value = ''; // Default jika tidak masuk kategori
-            }
-        }
-
-        // Fungsi untuk mengotomatiskan Klasifikasi Tekanan Darah
-        function calculateKlasifikasiTekananDarah() {
-            const sistolik = parseFloat(document.getElementById('tekananDarahSistolik').value);
-            const diastolik = parseFloat(document.getElementById('tekananDarahDiastolik').value);
-            const klasifikasiSelect = document.getElementById('klasifikasiTekananDarah');
-
-            if (isNaN(sistolik) || isNaN(diastolik)) {
-                klasifikasiSelect.value = ''; // Reset jika input tidak valid
-                return;
-            }
-
-            // --- PENTING: Ganti logika ini dengan klasifikasi berdasarkan persentil
-            //              tekanan darah anak sesuai usia, jenis kelamin, dan tinggi badan.
-            //              Ini hanyalah contoh rentang absolut berdasarkan deskripsi di tabel.
-            if (sistolik < 90 && diastolik < 60) {
-                klasifikasiSelect.value = 'Normal <90/60 mmHg dan <95 persentil';
-            } else if ((sistolik >= 90 && sistolik <= 120) || (diastolik >= 60 && diastolik <= 80)) {
-                klasifikasiSelect.value = 'Pre-hipertensi Sistolik 90-120 mmHg dan/atau Diastolik 60-80 mmHg atau >=90 persentil dan <95 persentil';
-            } else if ((sistolik >= 120 && sistolik <= 139) || (diastolik >= 80 && diastolik <= 89)) {
-                klasifikasiSelect.value = 'Hipertensi tingkat 1 Sistolik 120-139 mmHg dan/atau Diastolik 80-89 mmHg atau >=95 persentil dan <99 persentil + 5 mmHg';
-            } else if (sistolik >= 140 || diastolik >= 90) {
-                klasifikasiSelect.value = 'Hipertensi tingkat 2 >=140/90 mmHg atau >=99 persentil + 5 mmHg';
-            } else {
-                klasifikasiSelect.value = ''; // Default jika tidak masuk kategori
-            }
-        }
-
-        // Event listener untuk perubahan tinggi dan berat badan (akan memicu IMT dan Status Gizi)
-        document.getElementById('tinggiBadan').addEventListener('input', calculateIMT);
-        document.getElementById('beratBadan').addEventListener('input', calculateIMT);
-
-        // Event listener untuk perubahan tekanan darah (akan memicu Klasifikasi Tekanan Darah)
-        document.getElementById('tekananDarahSistolik').addEventListener('input', calculateKlasifikasiTekananDarah);
-        document.getElementById('tekananDarahDiastolik').addEventListener('input', calculateKlasifikasiTekananDarah);
-
-        // Event listener untuk perubahan tanggal lahir
-        document.getElementById('tanggalLahir').addEventListener('change', calculateAge);
-
-        // Fungsi untuk menampilkan/menyembunyikan pertanyaan berdasarkan kelas
-        document.getElementById('kelas').addEventListener('change', function() {
-            const selectedClass = parseInt(this.value);
-
-            // Elemen-elemen yang harus disembunyikan/ditampilkan
-            const kesehatanReproduksiField = document.getElementById('kesehatanReproduksiField');
-            const merokokContainer = document.getElementById('merokokContainer');
-            const merokokDetailFields = document.getElementById('merokokDetailFields');
-            const terpaparAsapRokokField = document.getElementById('terpaparAsapRokokField');
-            const aktivitasFisikKuesionerField = document.getElementById('aktivitasFisikKuesionerField');
-            const parQChildField = document.getElementById('parQChildField');
-            const imunisasiKuesionerField = document.getElementById('imunisasiKuesionerField');
-
-            // Sembunyikan semua secara default
-            kesehatanReproduksiField.classList.add('hidden-field');
-            merokokContainer.classList.add('hidden-field');
+        if (merokokValue === 'Ya') {
+            merokokDetailFields.classList.remove('hidden-field');
+        } else {
             merokokDetailFields.classList.add('hidden-field');
-            terpaparAsapRokokField.classList.add('hidden-field');
-            aktivitasFisikKuesionerField.classList.add('hidden-field');
-            parQChildField.classList.add('hidden-field');
-            imunisasiKuesionerField.classList.add('hidden-field');
-
-            // Tampilkan jika kelas 4, 5, atau 6
-            if (selectedClass >= 4 && selectedClass <= 6) {
-                kesehatanReproduksiField.classList.remove('hidden-field');
-                merokokContainer.classList.remove('hidden-field');
-                terpaparAsapRokokField.classList.remove('hidden-field');
-                aktivitasFisikKuesionerField.classList.remove('hidden-field');
-                parQChildField.classList.remove('hidden-field');
-                imunisasiKuesionerField.classList.remove('hidden-field');
-                document.getElementById('merokokDalam1TahunTerakhir').dispatchEvent(new Event('change'));
-            }
-        });
-
-        // Event listener untuk pertanyaan "Merokok dalam 1 tahun terakhir"
-        document.getElementById('merokokDalam1TahunTerakhir').addEventListener('change', function() {
-            const merokokValue = this.value;
-            const merokokDetailFields = document.getElementById('merokokDetailFields');
-
-            if (merokokValue === 'Ya') {
-                merokokDetailFields.classList.remove('hidden-field');
-            } else {
-                merokokDetailFields.classList.add('hidden-field');
-            }
-        });
-
-        // Fungsi untuk menyimpan data ke Local Storage
-        function saveDataToLocalStorage(data) {
-            try {
-                let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
-                storedData.push(data);
-                localStorage.setItem('formDataSD', JSON.stringify(storedData));
-                console.log('Data berhasil disimpan ke Local Storage:', data); // Debugging
-                showMessage('Data berhasil disimpan secara offline! Akan disinkronkan saat online.');
-            } catch (error) {
-                console.error('Gagal menyimpan data ke Local Storage:', error);
-                showMessage('Terjadi kesalahan saat menyimpan data secara offline.');
-            }
         }
+    });
 
-        // Fungsi untuk mengirim data ke Google Sheets dengan exponential backoff
-        async function sendDataToGoogleSheets(data, retries = 3, delay = 1000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'no-cors', // Penting untuk Google Apps Script Web App
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    });
-
-                    console.log('Data berhasil dikirim ke Google Sheets (asumsi berhasil karena no-cors mode).');
-                    return true;
-                } catch (error) {
-                    console.error(`Percobaan ${i + 1} gagal mengirim data ke Google Sheets:`, error);
-                    if (i < retries - 1) {
-                        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
-                    }
-                }
-            }
-            return false;
-        }
-
-        // --- FUNGSI SINKRONISASI BARU (DIUBAH) ---
-        async function syncDataToGoogleSheets() {
+    // Fungsi untuk menyimpan data ke Local Storage
+    function saveDataToLocalStorage(data) {
+        try {
             let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
-            if (storedData.length === 0) {
-                return;
-            }
-            
-            showMessage('Menyinkronkan data...', true);
-            let updatedData = [];
-            let successfulSyncs = 0;
+            storedData.push(data);
+            localStorage.setItem('formDataSD', JSON.stringify(storedData));
+            console.log('Data berhasil disimpan ke Local Storage:', data); // Debugging
+            showMessage('Data berhasil disimpan secara offline! Akan disinkronkan saat online.');
+        } catch (error) {
+            console.error('Gagal menyimpan data ke Local Storage:', error);
+            showMessage('Terjadi kesalahan saat menyimpan data secara offline.');
+        }
+    }
 
-            for (const item of storedData) {
-                // Hanya kirim data yang belum disinkronkan
-                if (!item.isSynced) {
-                    const success = await sendDataToGoogleSheets(item);
-                    if (success) {
-                        item.isSynced = true;
-                        successfulSyncs++;
-                    }
+    // Fungsi untuk mengirim data ke Google Sheets dengan exponential backoff
+    async function sendDataToGoogleSheets(data, retries = 3, delay = 1000) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Penting untuk Google Apps Script Web App
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                console.log('Data berhasil dikirim ke Google Sheets (asumsi berhasil karena no-cors mode).');
+                return true;
+            } catch (error) {
+                console.error(`Percobaan ${i + 1} gagal mengirim data ke Google Sheets:`, error);
+                if (i < retries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
                 }
-                updatedData.push(item);
             }
-            
-            // Simpan kembali semua data (termasuk yang sudah disinkronkan) ke Local Storage
-            localStorage.setItem('formDataSD', JSON.stringify(updatedData));
-            
-            if (successfulSyncs > 0) {
-                showMessage(`Sinkronisasi selesai. ${successfulSyncs} data berhasil dikirim.`);
-            } else {
-                hideMessage(); // Sembunyikan notifikasi jika tidak ada data baru yang berhasil disinkronkan
-            }
-
-            console.log('Data setelah sinkronisasi:', updatedData);
-            loadMyDataList(); // Muat ulang daftar setelah sinkronisasi
         }
+        return false;
+    }
 
-        // Cek status online dan panggil sinkronisasi secara berkala
-        function checkOnlineStatusAndSync() {
-            if (navigator.onLine) {
-                let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
-                const unsyncedDataExists = storedData.some(item => !item.isSynced);
-                
-                if (unsyncedDataExists) {
-                    console.log('Online. Mencoba menyinkronkan data...');
-                    syncDataToGoogleSheets();
-                } else {
-                    console.log('Online. Tidak ada data offline yang perlu disinkronkan.');
+    // --- FUNGSI SINKRONISASI BARU (DIUBAH) ---
+    async function syncDataToGoogleSheets() {
+        let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
+        if (storedData.length === 0) {
+            return;
+        }
+        
+        showMessage('Menyinkronkan data...', true);
+        let updatedData = [];
+        let successfulSyncs = 0;
+
+        for (const item of storedData) {
+            // Hanya kirim data yang belum disinkronkan
+            if (!item.isSynced) {
+                const success = await sendDataToGoogleSheets(item);
+                if (success) {
+                    item.isSynced = true;
+                    successfulSyncs++;
                 }
+            }
+            updatedData.push(item);
+        }
+        
+        // Simpan kembali semua data (termasuk yang sudah disinkronkan) ke Local Storage
+        localStorage.setItem('formDataSD', JSON.stringify(updatedData));
+        
+        if (successfulSyncs > 0) {
+            showMessage(`Sinkronisasi selesai. ${successfulSyncs} data berhasil dikirim.`);
+        } else {
+            hideMessage(); // Sembunyikan notifikasi jika tidak ada data baru yang berhasil disinkronkan
+        }
+
+        console.log('Data setelah sinkronisasi:', updatedData);
+        loadMyDataList(); // Muat ulang daftar setelah sinkronisasi
+    }
+
+    // Cek status online dan panggil sinkronisasi secara berkala
+    function checkOnlineStatusAndSync() {
+        if (navigator.onLine) {
+            let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
+            const unsyncedDataExists = storedData.some(item => !item.isSynced);
+            
+            if (unsyncedDataExists) {
+                console.log('Online. Mencoba menyinkronkan data...');
+                syncDataToGoogleSheets();
             } else {
-                console.log('Offline. Sinkronisasi ditunda.');
+                console.log('Online. Tidak ada data offline yang perlu disinkronkan.');
             }
+        } else {
+            console.log('Offline. Sinkronisasi ditunda.');
+        }
+    }
+
+    // Panggil checkOnlineStatusAndSync setiap 10 detik
+    setInterval(checkOnlineStatusAndSync, 10000);
+
+    // Fungsi untuk mereset formulir ke nilai default (termasuk nilai "normal" yang sudah ditentukan)
+    function resetFormToDefaults() {
+        document.getElementById('dataSiswaForm').reset(); // Reset HTML form elements
+
+        // Explicitly set default values for dropdowns
+        document.getElementById('risikoTuberkulosis').value = 'Tidak';
+        document.getElementById('risikoDiabetesMellitus').value = 'Tidak';
+        document.getElementById('risikoKesehatanJiwa').value = 'Tidak Ada';
+        document.getElementById('kesehatanReproduksi').value = 'Tidak';
+        document.getElementById('merokokDalam1TahunTerakhir').value = 'Tidak';
+        document.getElementById('terpaparAsapRokok').value = 'Tidak';
+        document.getElementById('risikoHepatitisB').value = 'Tidak';
+        document.getElementById('aktivitasFisikKuesioner').value = 'Ya';
+        document.getElementById('parQChild').value = 'Tidak';
+        document.getElementById('imunisasiKuesioner').value = 'Ya';
+        document.getElementById('risikoFrambusia').value = 'Tidak';
+        document.getElementById('risikoKusta').value = 'Tidak';
+        document.getElementById('risikoScabies').value = 'Tidak';
+        document.getElementById('risikoMalaria').value = 'Tidak';
+        document.getElementById('klasifikasiTekananDarah').value = '';
+        document.getElementById('penilaianStatusGizi').value = '';
+        document.getElementById('karies').value = 'Tidak';
+        document.getElementById('mataLuar').value = 'Mata sehat';
+        document.getElementById('gangguanTajam Penglihatan').value = 'Normal: Visus 6/6 - 6/9';
+        document.getElementById('infeksiTelinga').value = 'Tidak';
+        document.getElementById('serumen').value = 'Tidak';
+        document.getElementById('gangguanTajam Pendengaran').value = 'Dapat mengulang kata lebih dari 80% (minimal 4 dari 5)';
+        document.getElementById('kebugaranJasmani').value = 'Baik sekali/ Baik';
+        document.getElementById('kesimpulan').value = 'Tidak Rujuk';
+
+        // Reset visibilitas field kondisional
+        document.getElementById('kesehatanReproduksiField').classList.add('hidden-field');
+        document.getElementById('merokokContainer').classList.add('hidden-field');
+        document.getElementById('merokokDetailFields').classList.add('hidden-field');
+        document.getElementById('terpaparAsapRokokField').classList.add('hidden-field');
+        document.getElementById('aktivitasFisikKuesionerField').classList.add('hidden-field');
+        document.getElementById('parQChildField').classList.add('hidden-field');
+        document.getElementById('imunisasiKuesionerField').classList.add('hidden-field');
+        // Reset nilai input teks/angka
+        document.getElementById('imt').value = '';
+        document.getElementById('usia').value = '';
+        document.getElementById('tekananDarahSistolik').value = '';
+        document.getElementById('tekananDarahDiastolik').value = '';
+        document.getElementById('waktuKebugaranJasmani').value = '';
+        document.getElementById('namaSekolah').value = ''; // Reset nama sekolah dropdown
+        document.getElementById('kelas').value = ''; // Reset kelas dropdown
+    }
+
+    // Event listener untuk submit formulir
+    document.getElementById('dataSiswaForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
         }
 
-        // Panggil checkOnlineStatusAndSync setiap 10 detik
-        setInterval(checkOnlineStatusAndSync, 10000);
-
-        // Fungsi untuk mereset formulir ke nilai default (termasuk nilai "normal" yang sudah ditentukan)
-        function resetFormToDefaults() {
-            document.getElementById('dataSiswaForm').reset(); // Reset HTML form elements
-
-            // Explicitly set default values for dropdowns
-            document.getElementById('risikoTuberkulosis').value = 'Tidak';
-            document.getElementById('risikoDiabetesMellitus').value = 'Tidak';
-            document.getElementById('risikoKesehatanJiwa').value = 'Tidak Ada';
-            document.getElementById('kesehatanReproduksi').value = 'Tidak';
-            document.getElementById('merokokDalam1TahunTerakhir').value = 'Tidak';
-            document.getElementById('terpaparAsapRokok').value = 'Tidak';
-            document.getElementById('risikoHepatitisB').value = 'Tidak';
-            document.getElementById('aktivitasFisikKuesioner').value = 'Ya';
-            document.getElementById('parQChild').value = 'Tidak';
-            document.getElementById('imunisasiKuesioner').value = 'Ya';
-            document.getElementById('risikoFrambusia').value = 'Tidak';
-            document.getElementById('risikoKusta').value = 'Tidak';
-            document.getElementById('risikoScabies').value = 'Tidak';
-            document.getElementById('risikoMalaria').value = 'Tidak';
-            document.getElementById('klasifikasiTekananDarah').value = '';
-            document.getElementById('penilaianStatusGizi').value = '';
-            document.getElementById('karies').value = 'Tidak';
-            document.getElementById('mataLuar').value = 'Mata sehat';
-            document.getElementById('gangguanTajamPenglihatan').value = 'Normal: Visus 6/6 - 6/9';
-            document.getElementById('infeksiTelinga').value = 'Tidak';
-            document.getElementById('serumen').value = 'Tidak';
-            document.getElementById('gangguanTajamPendengaran').value = 'Dapat mengulang kata lebih dari 80% (minimal 4 dari 5)';
-            document.getElementById('kebugaranJasmani').value = 'Baik sekali/ Baik';
-            document.getElementById('kesimpulan').value = 'Tidak Rujuk';
-
-            // Reset visibilitas field kondisional
-            document.getElementById('kesehatanReproduksiField').classList.add('hidden-field');
-            document.getElementById('merokokContainer').classList.add('hidden-field');
-            document.getElementById('merokokDetailFields').classList.add('hidden-field');
-            document.getElementById('terpaparAsapRokokField').classList.add('hidden-field');
-            document.getElementById('aktivitasFisikKuesionerField').classList.add('hidden-field');
-            document.getElementById('parQChildField').classList.add('hidden-field');
-            document.getElementById('imunisasiKuesionerField').classList.add('hidden-field');
-            // Reset nilai input teks/angka
-            document.getElementById('imt').value = '';
-            document.getElementById('usia').value = '';
-            document.getElementById('tekananDarahSistolik').value = '';
-            document.getElementById('tekananDarahDiastolik').value = '';
-            document.getElementById('waktuKebugaranJasmani').value = '';
-            document.getElementById('namaSekolah').value = ''; // Reset nama sekolah dropdown
-            document.getElementById('kelas').value = ''; // Reset kelas dropdown
+        // Menambahkan tanda petik di depan NISN, NIK, dan No HP untuk memaksa format teks di Google Sheets
+        if (data['NISN'] && data['NISN'].length > 0) {
+            data['NISN'] = `'` + data['NISN'];
+        }
+        if (data['NIK'] && data['NIK'].length > 0) {
+            data['NIK'] = `'` + data['NIK'];
+        }
+        if (data['No. HP'] && data['No. HP'].length > 0) {
+            data['No. HP'] = `'` + data['No. HP'];
         }
 
-        // Event listener untuk submit formulir
-        document.getElementById('dataSiswaForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                data[key] = value;
+        // Tambahkan atau perbarui data
+        let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
+        
+        if (editingTimestamp !== null) {
+            // Mode edit: timpa data lama
+            const indexToUpdate = storedData.findIndex(item => item.timestamp === editingTimestamp);
+            if (indexToUpdate !== -1) {
+                const oldTimestamp = storedData[indexToUpdate].timestamp;
+                data['timestamp'] = oldTimestamp; // Pertahankan timestamp lama
+                data['isSynced'] = false; // Set kembali ke false agar disinkronkan
+                storedData[indexToUpdate] = data;
+                showMessage('Data berhasil diperbarui secara offline! Akan disinkronkan saat online.');
             }
-
-            // Menambahkan tanda petik di depan NISN, NIK, dan No HP untuk memaksa format teks di Google Sheets
-            if (data['NISN'] && data['NISN'].length > 0) {
-                data['NISN'] = `'` + data['NISN'];
-            }
-            if (data['NIK'] && data['NIK'].length > 0) {
-                data['NIK'] = `'` + data['NIK'];
-            }
-            if (data['No. HP'] && data['No. HP'].length > 0) {
-                data['No. HP'] = `'` + data['No. HP'];
-            }
-
-            // Tambahkan properti isSynced
+        } else {
+            // Mode tambah baru
             data['isSynced'] = false;
-            // Tambahkan timestamp agar bisa diurutkan
             data['timestamp'] = new Date().toISOString();
-
-            saveDataToLocalStorage(data);
-
-            if (navigator.onLine) {
-                await syncDataToGoogleSheets();
-            }
-
-            resetFormToDefaults(); // Panggil fungsi reset baru
-            loadMyDataList(); // Muat ulang daftar data saya
-            showView('list'); // Kembali ke tampilan daftar data saya
-        });
-
-        // --- Fungsi untuk memuat dan menampilkan data dari Local Storage (Daftar Data Saya) ---
-        function loadMyDataList() {
-            const myStudentTableBody = document.getElementById('myStudentTableBody');
-            const myStudentTable = document.getElementById('myStudentTable');
-            const noMyDataMessage = document.getElementById('noMyDataMessage');
-            myStudentTableBody.innerHTML = ''; // Bersihkan tabel
-
-            let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
-            console.log('Data dimuat dari Local Storage:', storedData); // Debugging
-
-            if (storedData.length === 0) {
-                noMyDataMessage.classList.remove('hidden');
-                myStudentTable.classList.add('hidden');
-            } else {
-                noMyDataMessage.classList.add('hidden');
-                myStudentTable.classList.remove('hidden');
-
-                // Urutkan data berdasarkan timestamp (terbaru di atas)
-                storedData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                
-                storedData.forEach((data, index) => {
-                    const statusIcon = data.isSynced
-                        ? `<i class="fa-solid fa-circle-check text-green-500" title="Tersimpan di Sheet"></i>`
-                        : `<i class="fa-solid fa-circle-check text-gray-400" title="Belum tersimpan"></i>`;
-
-                    const row = myStudentTableBody.insertRow();
-                    row.innerHTML = `
-                        <td class="py-3 px-4 text-center">${statusIcon}</td>
-                        <td class="py-3 px-4">${data['Nama Satuan Pendidikan'] || ''}</td>
-                        <td class="py-3 px-4">${data['Kelas'] || ''}</td>
-                        <td class="py-3 px-4">${data['Nama'] || ''}</td>
-                    `;
-                });
-            }
+            storedData.push(data);
+            showMessage('Data berhasil disimpan secara offline! Akan disinkronkan saat online.');
         }
 
-        // --- Fungsi untuk memuat dan menampilkan rekap data global dari Google Sheets (Telah diubah) ---
-        async function fetchGlobalData() {
-            const loadingGlobalDataMessage = document.getElementById('loadingGlobalDataMessage');
-            const noGlobalDataMessage = document.getElementById('noGlobalDataMessage');
+        localStorage.setItem('formDataSD', JSON.stringify(storedData));
+
+        if (navigator.onLine) {
+            await syncDataToGoogleSheets();
+        }
+
+        resetFormToDefaults(); // Panggil fungsi reset baru
+        loadMyDataList(); // Muat ulang daftar data saya
+        showView('list'); // Kembali ke tampilan daftar data saya
+    });
+    
+    // --- FUNGSI BARU: Pencarian data ---
+    function searchMyData() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
+
+        if (searchTerm === '') {
+            loadMyDataList(); // Tampilkan semua data jika kolom pencarian kosong
+            return;
+        }
+
+        const filteredData = storedData.filter(data => 
+            data.Nama.toLowerCase().includes(searchTerm)
+        );
+        
+        loadMyDataList(filteredData); // Tampilkan data yang difilter
+    }
+
+    // Tambahkan event listener untuk kolom pencarian
+    document.getElementById('searchInput').addEventListener('input', searchMyData);
+
+
+    // --- Fungsi untuk memuat dan menampilkan data dari Local Storage (Daftar Data Saya) ---
+    function loadMyDataList(dataToDisplay = null) {
+        const myStudentTableBody = document.getElementById('myStudentTableBody');
+        const myStudentTable = document.getElementById('myStudentTable');
+        const noMyDataMessage = document.getElementById('noMyDataMessage');
+        myStudentTableBody.innerHTML = ''; // Bersihkan tabel
+
+        const storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
+        const displayData = dataToDisplay || storedData;
+
+        if (displayData.length === 0) {
+            noMyDataMessage.classList.remove('hidden');
+            myStudentTable.classList.add('hidden');
+        } else {
+            noMyDataMessage.classList.add('hidden');
+            myStudentTable.classList.remove('hidden');
+
+            // Urutkan data berdasarkan timestamp (terbaru di atas)
+            displayData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
-            document.getElementById('globalStudentTable').classList.add('hidden');
+            displayData.forEach((data, index) => {
+                const statusIcon = data.isSynced
+                    ? `<i class="fa-solid fa-circle-check text-green-500" title="Tersimpan di Sheet"></i>`
+                    : `<i class="fa-solid fa-circle-check text-gray-400" title="Belum tersimpan"></i>`;
+                
+                // Perbaikan: gunakan timestamp sebagai identifikasi unik
+                const row = myStudentTableBody.insertRow();
+                row.classList.add('hover:bg-gray-100');
+                row.setAttribute('onclick', `editData('${data.timestamp}')`);
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-center">${statusIcon}</td>
+                    <td class="py-3 px-4">${data['Nama Satuan Pendidikan'] || ''}</td>
+                    <td class="py-3 px-4">${data['Kelas'] || ''}</td>
+                    <td class="py-3 px-4">${data['Nama'] || ''}</td>
+                `;
+            });
+        }
+    }
+    
+    // --- FUNGSI BARU: Mengisi formulir dengan data yang dipilih ---
+    function editData(timestamp) {
+        let storedData = JSON.parse(localStorage.getItem('formDataSD')) || [];
+        // Cari data yang benar berdasarkan timestamp
+        const dataToEdit = storedData.find(item => item.timestamp === timestamp);
+        if (!dataToEdit) return;
+
+        editingTimestamp = timestamp; // Set timestamp data yang sedang diedit
+
+        // Ubah teks tombol menjadi 'Update Data'
+        document.getElementById('submitButton').textContent = 'Update Data';
+
+        // Isi semua input formulir dengan data yang ada
+        for (const key in dataToEdit) {
+            const element = document.getElementById(getFormElementId(key));
+            if (element) {
+                if (element.type === 'checkbox') {
+                    element.checked = dataToEdit[key] === 'Ya';
+                } else {
+                    // Hilangkan tanda petik dari NISN, NIK, No. HP saat ditampilkan
+                    if (['NISN', 'NIK', 'No. HP'].includes(key) && typeof dataToEdit[key] === 'string' && dataToEdit[key].startsWith("'")) {
+                        element.value = dataToEdit[key].substring(1);
+                    } else {
+                        element.value = dataToEdit[key];
+                    }
+                }
+            }
+        }
+        
+        // Panggil fungsi untuk menampilkan/menyembunyikan field kondisional
+        const kelasInput = document.getElementById('kelas');
+        if (kelasInput) {
+            // Panggil event change secara manual untuk mengaktifkan logika kondisional
+            kelasInput.dispatchEvent(new Event('change'));
+        }
+
+        showView('form'); // Beralih ke tampilan formulir
+    }
+
+    // Fungsi pembantu untuk mencocokkan nama kunci data dengan ID elemen formulir
+    function getFormElementId(key) {
+        const keyMap = {
+            'Nama Satuan Pendidikan': 'namaSekolah',
+            'Nama': 'nama',
+            'Jenis Kelamin': 'jenisKelamin',
+            'Kelas': 'kelas',
+            'NISN': 'nisn',
+            'NIK': 'nik',
+            'Tempat Lahir': 'tempatLahir',
+            'Tanggal Lahir': 'tanggalLahir',
+            'Usia (Ulang tahun terakhir)': 'usia',
+            'Alamat': 'alamat',
+            'No. HP': 'noHp',
+            'Risiko Tuberkulosis': 'risikoTuberkulosis',
+            'Risiko Diabetes Mellitus': 'risikoDiabetesMellitus',
+            'Risiko Kesehatan Jiwa': 'risikoKesehatanJiwa',
+            'Kesehatan Reproduksi (Kelas 4-6)': 'kesehatanReproduksi',
+            'Merokok dalam 1 tahun terakhir': 'merokokDalam1TahunTerakhir',
+            'Jenis rokok yang dikonsumsi': 'jenisRokok',
+            'Jumlah rokok per hari': 'jumlahRokokPerHari',
+            'Lama merokok (dalam tahun)': 'lamaMerokok',
+            'Terpapar Asap Rokok Orang Lain': 'terpaparAsapRokok',
+            'Risiko Hepatitis B': 'risikoHepatitisB',
+            'Aktivitas Fisik (kelas 4-6)': 'aktivitasFisikKuesioner',
+            'Par Q Child (kelas 4-6)': 'parQChild',
+            'Riwayat Imunisasi Rutin Lengkap': 'imunisasiKuesioner',
+            'Risiko Frambusia': 'risikoFrambusia',
+            'Risiko Kusta': 'risikoKusta',
+            'Risiko Scabies': 'risikoScabies',
+            'Risiko Malaria khusus daerah endemis*': 'risikoMalaria',
+            'Tekanan Darah Sistolik (mmHg)': 'tekananDarahSistolik',
+            'Tekanan Darah Diastolik (mmHg)': 'tekananDarahDiastolik',
+            'Klasifikasi Tekanan Darah': 'klasifikasiTekananDarah',
+            'Tinggi Badan': 'tinggiBadan',
+            'Berat Badan': 'beratBadan',
+            'IMT': 'imt',
+            'Penilaian Status Gizi': 'penilaianStatusGizi',
+            'Karies': 'karies',
+            'Masalah lainnya': 'masalahLainnyaGigi',
+            'Mata Luar': 'mataLuar',
+            'Gangguan Tajam Penglihatan': 'gangguanTajamPenglihatan',
+            'Infeksi (Telinga)': 'infeksiTelinga',
+            'Serumen': 'serumen',
+            'Gangguan Tajam Pendengaran': 'gangguanTajamPendengaran',
+            'Waktu Kebugaran Jasmani': 'waktuKebugaranJasmani',
+            'Kebugaran Jasmani': 'kebugaranJasmani',
+            'Kesimpulan': 'kesimpulan'
+        };
+        return keyMap[key] || key;
+    }
+
+    // --- Fungsi untuk memuat dan menampilkan rekap data global dari Google Sheets (Telah diubah) ---
+    async function fetchGlobalData() {
+        const loadingGlobalDataMessage = document.getElementById('loadingGlobalDataMessage');
+        const noGlobalDataMessage = document.getElementById('noGlobalDataMessage');
+        
+        document.getElementById('globalStudentTable').classList.add('hidden');
+        noGlobalDataMessage.classList.add('hidden');
+        loadingGlobalDataMessage.classList.remove('hidden'); // Tampilkan pesan loading
+
+        try {
+            const response = await fetch(REKAP_WEB_APP_URL, {
+                method: 'GET',
+                mode: 'cors'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`HTTP error! status: ${response.status}, response: ${errorText}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Data global diterima:', data);
+            globalRawData = data; // Simpan data mentah ke variabel global
+
+            loadingGlobalDataMessage.classList.add('hidden');
+            
+            // Panggil fungsi untuk mengisi dropdown sekolah dan memfilter tabel
+            populateSchoolDropdown(globalRawData);
+            filterAndDisplayRecap(); // Tampilkan rekap awal
+            
+        } catch (error) {
+            console.error('Gagal mengambil data global:', error);
+            loadingGlobalDataMessage.classList.add('hidden');
+            noGlobalDataMessage.textContent = `Gagal memuat data global: ${error.message}`;
+            noGlobalDataMessage.classList.remove('hidden');
+        }
+    }
+
+    // Fungsi untuk mengisi dropdown sekolah secara dinamis
+    function populateSchoolDropdown(data) {
+        const schoolSelect = document.getElementById('downloadSekolahSelect');
+        schoolSelect.innerHTML = `
+            <option value="all">Semua Sekolah</option>
+            <option value="SDN 1 ARAWA">SDN 1 ARAWA</option>
+            <option value="SDN 2 ARAWA">SDN 2 ARAWA</option>
+            <option value="SDN 3 ARAWA">SDN 3 ARAWA</option>
+            <option value="SDN 4 ARAWA">SDN 4 ARAWA</option>
+            <option value="SDN 5 ARAWA">SDN 5 ARAWA</option>
+            <option value="SDN 6 ARAWA">SDN 6 ARAWA</option>
+            <option value="SDN 7 ARAWA">SDN 7 ARAWA</option>
+            <option value="SDN 8 ARAWA">SDN 8 ARAWA</option>
+            <option value="SDN 9 ARAWA">SDN 9 ARAWA</option>
+            <option value="SDN 10 ARAWA">SDN 10 ARAWA</option>
+            <option value="SDN 1 LAWAWOI">SDN 1 LAWAWOI</option>
+            <option value="SDN 2 LAWAWOI">SDN 2 LAWAWOI</option>
+            <option value="SDN 3 LAWAWOI">SDN 3 LAWAWOI</option>
+            <option value="SDN 4 LAWAWOI">SDN 4 LAWAWOI</option>
+            <option value="SDN 5 LAWAWOI">SDN 5 LAWAWOI</option>
+            <option value="SDN 1 CARAWALI">SDN 1 CARAWALI</option>
+            <option value="SDN 2 CARAWALI">SDN 2 CARAWALI</option>
+            <option value="SDN 3 CARAWALI">SDN 3 CARAWALI</option>
+            <option value="SDN 4 CARAWALI">SDN 4 CARAWALI</option>
+            <option value="SDN 1 LAINUNGAN">SDN 1 LAINUNGAN</option>
+            <option value="SDN 2 LAINUNGAN">SDN 2 LAINUNGAN</option>
+            <option value="SDN 3 LAINUNGAN">SDN 3 LAINUNGAN</option>
+            <option value="SDN 4 LAINUNGAN">SDN 4 LAINUNGAN</option>
+            <option value="SD S IT AL IMAN">SD S IT AL IMAN</option>
+        `; // Reset dropdown
+
+        const uniqueSchools = [...new Set(data.map(item => item['Nama Satuan Pendidikan']))];
+        uniqueSchools.forEach(school => {
+            const option = document.createElement('option');
+            option.value = school;
+            option.textContent = school;
+            schoolSelect.appendChild(option);
+        });
+    }
+    
+    // --- FUNGSI BARU: Filter dan Tampilkan Data Rekap ---
+    function filterAndDisplayRecap() {
+        const selectedSchool = document.getElementById('downloadSekolahSelect').value;
+        const selectedClass = document.getElementById('downloadKelasSelect').value;
+
+        // Saring data mentah berdasarkan pilihan dropdown
+        const filteredData = globalRawData.filter(item => {
+            const schoolMatch = (selectedSchool === 'all' || item['Nama Satuan Pendidikan'] === selectedSchool);
+            const classMatch = (selectedClass === 'all' || item['Kelas'].toString() === selectedClass);
+            return schoolMatch && classMatch;
+        });
+        
+        // Lakukan rekapitulasi data yang sudah disaring
+        const rekapData = filteredData.reduce((acc, current) => {
+            const key = `${current['Nama Satuan Pendidikan']}-${current['Kelas']}`;
+            if (!acc[key]) {
+                acc[key] = {
+                    'Nama Satuan Pendidikan': current['Nama Satuan Pendidikan'],
+                    'Kelas': current['Kelas'],
+                    'Jumlah Data': 0
+                };
+            }
+            acc[key]['Jumlah Data']++;
+            return acc;
+        }, {});
+
+        // Tampilkan hasil rekapitulasi ke tabel
+        displayRecapTable(rekapData);
+    }
+
+    // Fungsi untuk menampilkan data rekapitulasi ke tabel
+    function displayRecapTable(rekapData) {
+        const globalStudentTableBody = document.getElementById('globalStudentTableBody');
+        const globalStudentTable = document.getElementById('globalStudentTable');
+        const noGlobalDataMessage = document.getElementById('noGlobalDataMessage');
+
+        globalStudentTableBody.innerHTML = '';
+        
+        if (Object.keys(rekapData).length > 0) {
+            globalStudentTable.classList.remove('hidden');
             noGlobalDataMessage.classList.add('hidden');
-            loadingGlobalDataMessage.classList.remove('hidden'); // Tampilkan pesan loading
-
-            try {
-                const response = await fetch(REKAP_WEB_APP_URL, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error(`HTTP error! status: ${response.status}, response: ${errorText}`);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log('Data global diterima:', data);
-                globalRawData = data; // Simpan data mentah ke variabel global
-
-                loadingGlobalDataMessage.classList.add('hidden');
-                
-                // Panggil fungsi untuk mengisi dropdown sekolah dan memfilter tabel
-                populateSchoolDropdown(globalRawData);
-                filterAndDisplayRecap(); // Tampilkan rekap awal
-                
-            } catch (error) {
-                console.error('Gagal mengambil data global:', error);
-                loadingGlobalDataMessage.classList.add('hidden');
-                noGlobalDataMessage.textContent = `Gagal memuat data global: ${error.message}`;
-                noGlobalDataMessage.classList.remove('hidden');
+            let index = 1;
+            for (const key in rekapData) {
+                const item = rekapData[key];
+                const row = globalStudentTableBody.insertRow();
+                row.innerHTML = `
+                    <td class="py-3 px-4">${index++}</td>
+                    <td class="py-3 px-4">${item['Nama Satuan Pendidikan'] || ''}</td>
+                    <td class="py-3 px-4">${item['Kelas'] || ''}</td>
+                    <td class="py-3 px-4">${item['Jumlah Data'] || 0}</td>
+                `;
             }
+        } else {
+            globalStudentTable.classList.add('hidden');
+            noGlobalDataMessage.textContent = 'Tidak ada data yang cocok dengan filter yang dipilih.';
+            noGlobalDataMessage.classList.remove('hidden');
+        }
+    }
+    
+    // --- FUNGSI BARU: Menambahkan event listener ke dropdown untuk memicu filter ---
+    document.getElementById('downloadSekolahSelect').addEventListener('change', filterAndDisplayRecap);
+    document.getElementById('downloadKelasSelect').addEventListener('change', filterAndDisplayRecap);
+
+    // --- FUNGSI BARU UNTUK DOWNLOAD CSV (DIUBAH) ---
+    function downloadCSV() {
+        if (globalRawData.length === 0) {
+            showMessage('Tidak ada data yang dapat diunduh.');
+            return;
         }
 
-        // Fungsi untuk mengisi dropdown sekolah secara dinamis
-        function populateSchoolDropdown(data) {
-            const schoolSelect = document.getElementById('downloadSekolahSelect');
-            schoolSelect.innerHTML = `
-                <option value="all">Semua Sekolah</option>
-                <option value="SDN 1 ARAWA">SDN 1 ARAWA</option>
-                <option value="SDN 2 ARAWA">SDN 2 ARAWA</option>
-                <option value="SDN 3 ARAWA">SDN 3 ARAWA</option>
-                <option value="SDN 4 ARAWA">SDN 4 ARAWA</option>
-                <option value="SDN 5 ARAWA">SDN 5 ARAWA</option>
-                <option value="SDN 6 ARAWA">SDN 6 ARAWA</option>
-                <option value="SDN 7 ARAWA">SDN 7 ARAWA</option>
-                <option value="SDN 8 ARAWA">SDN 8 ARAWA</option>
-                <option value="SDN 9 ARAWA">SDN 9 ARAWA</option>
-                <option value="SDN 10 ARAWA">SDN 10 ARAWA</option>
-                <option value="SDN 1 LAWAWOI">SDN 1 LAWAWOI</option>
-                <option value="SDN 2 LAWAWOI">SDN 2 LAWAWOI</option>
-                <option value="SDN 3 LAWAWOI">SDN 3 LAWAWOI</option>
-                <option value="SDN 4 LAWAWOI">SDN 4 LAWAWOI</option>
-                <option value="SDN 5 LAWAWOI">SDN 5 LAWAWOI</option>
-                <option value="SDN 1 CARAWALI">SDN 1 CARAWALI</option>
-                <option value="SDN 2 CARAWALI">SDN 2 CARAWALI</option>
-                <option value="SDN 3 CARAWALI">SDN 3 CARAWALI</option>
-                <option value="SDN 4 CARAWALI">SDN 4 CARAWALI</option>
-                <option value="SDN 1 LAINUNGAN">SDN 1 LAINUNGAN</option>
-                <option value="SDN 2 LAINUNGAN">SDN 2 LAINUNGAN</option>
-                <option value="SDN 3 LAINUNGAN">SDN 3 LAINUNGAN</option>
-                <option value="SDN 4 LAINUNGAN">SDN 4 LAINUNGAN</option>
-                <option value="SD S IT AL IMAN">SD S IT AL IMAN</option>
-            `; // Reset dropdown
+        const selectedSchool = document.getElementById('downloadSekolahSelect').value;
+        const selectedClass = document.getElementById('downloadKelasSelect').value;
 
-            const uniqueSchools = [...new Set(data.map(item => item['Nama Satuan Pendidikan']))];
-            uniqueSchools.forEach(school => {
-                const option = document.createElement('option');
-                option.value = school;
-                option.textContent = school;
-                schoolSelect.appendChild(option);
+        // Saring data mentah berdasarkan pilihan dropdown
+        const filteredData = globalRawData.filter(item => {
+            const schoolMatch = (selectedSchool === 'all' || item['Nama Satuan Pendidikan'] === selectedSchool);
+            const classMatch = (selectedClass === 'all' || item['Kelas'].toString() === selectedClass);
+            return schoolMatch && classMatch;
+        });
+        
+        if (filteredData.length === 0) {
+            showMessage('Tidak ada data yang cocok dengan kriteria yang dipilih.');
+            return;
+        }
+
+        // Dapatkan semua header dari objek data pertama, kecuali properti internal seperti isSynced dan timestamp
+        const headers = Object.keys(filteredData[0]).filter(key => key !== 'isSynced' && key !== 'timestamp');
+        
+        // Persiapan CSV
+        const csvRows = [];
+        // Buat baris header
+        csvRows.push(headers.map(header => `"${header.replace(/"/g, '""')}"`).join(','));
+
+        // Buat baris untuk setiap data yang difilter
+        for (const item of filteredData) {
+            const values = headers.map(header => {
+                const value = item[header];
+                // Handle nilai null, undefined, atau non-string
+                if (value === null || value === undefined) return '""';
+                // Jika nilai adalah string, escape tanda kutip ganda dan tambahkan tanda kutip di sekelilingnya
+                const stringValue = String(value);
+                return `"${stringValue.replace(/"/g, '""')}"`;
             });
+            csvRows.push(values.join(','));
         }
         
-        // --- FUNGSI BARU: Filter dan Tampilkan Data Rekap ---
-        function filterAndDisplayRecap() {
-            const selectedSchool = document.getElementById('downloadSekolahSelect').value;
-            const selectedClass = document.getElementById('downloadKelasSelect').value;
-
-            // Saring data mentah berdasarkan pilihan dropdown
-            const filteredData = globalRawData.filter(item => {
-                const schoolMatch = (selectedSchool === 'all' || item['Nama Satuan Pendidikan'] === selectedSchool);
-                const classMatch = (selectedClass === 'all' || item['Kelas'].toString() === selectedClass);
-                return schoolMatch && classMatch;
-            });
-            
-            // Lakukan rekapitulasi data yang sudah disaring
-            const rekapData = filteredData.reduce((acc, current) => {
-                const key = `${current['Nama Satuan Pendidikan']}-${current['Kelas']}`;
-                if (!acc[key]) {
-                    acc[key] = {
-                        'Nama Satuan Pendidikan': current['Nama Satuan Pendidikan'],
-                        'Kelas': current['Kelas'],
-                        'Jumlah Data': 0
-                    };
-                }
-                acc[key]['Jumlah Data']++;
-                return acc;
-            }, {});
-
-            // Tampilkan hasil rekapitulasi ke tabel
-            displayRecapTable(rekapData);
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        
+        // Buat nama file yang deskriptif
+        let fileName = 'data_kuesioner_global';
+        if (selectedSchool !== 'all') {
+            fileName += `_${selectedSchool.replace(/ /g, '_')}`;
         }
+        if (selectedClass !== 'all') {
+            fileName += `_Kelas_${selectedClass}`;
+        }
+        fileName += '.csv';
 
-        // Fungsi untuk menampilkan data rekapitulasi ke tabel
-        function displayRecapTable(rekapData) {
-            const globalStudentTableBody = document.getElementById('globalStudentTableBody');
-            const globalStudentTable = document.getElementById('globalStudentTable');
-            const noGlobalDataMessage = document.getElementById('noGlobalDataMessage');
+        // Buat link download dan picu klik
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showMessage('File CSV berhasil diunduh.');
+    }
 
-            globalStudentTableBody.innerHTML = '';
-            
-            if (Object.keys(rekapData).length > 0) {
-                globalStudentTable.classList.remove('hidden');
-                noGlobalDataMessage.classList.add('hidden');
-                let index = 1;
-                for (const key in rekapData) {
-                    const item = rekapData[key];
-                    const row = globalStudentTableBody.insertRow();
-                    row.innerHTML = `
-                        <td class="py-3 px-4">${index++}</td>
-                        <td class="py-3 px-4">${item['Nama Satuan Pendidikan'] || ''}</td>
-                        <td class="py-3 px-4">${item['Kelas'] || ''}</td>
-                        <td class="py-3 px-4">${item['Jumlah Data'] || 0}</td>
-                    `;
-                }
-            } else {
-                globalStudentTable.classList.add('hidden');
-                noGlobalDataMessage.textContent = 'Tidak ada data yang cocok dengan filter yang dipilih.';
-                noGlobalDataMessage.classList.remove('hidden');
-            }
+
+    // Panggil fungsi inisialisasi saat halaman dimuat
+    window.addEventListener('load', () => {
+        showView('list'); // Tampilkan tampilan daftar data saya secara default
+        checkOnlineStatusAndSync(); // Mulai sinkronisasi data offline
+    });
+    // --- Fungsi untuk mengelola tampilan halaman ---
+    function showView(viewId) {
+        const views = document.querySelectorAll('.view');
+        views.forEach(view => view.classList.remove('active')); // Sembunyikan semua tampilan
+
+        const navButtons = document.querySelectorAll('.nav-buttons button');
+        navButtons.forEach(button => button.classList.remove('active')); // Hapus active dari semua tombol nav
+
+        // Tampilkan tampilan yang diminta
+        const viewElement = document.getElementById(viewId + 'View');
+        if (viewElement) {
+            viewElement.classList.add('active');
         }
         
-        // --- FUNGSI BARU: Menambahkan event listener ke dropdown untuk memicu filter ---
-        document.getElementById('downloadSekolahSelect').addEventListener('change', filterAndDisplayRecap);
-        document.getElementById('downloadKelasSelect').addEventListener('change', filterAndDisplayRecap);
-
-        // --- FUNGSI BARU UNTUK DOWNLOAD CSV (DIUBAH) ---
-        function downloadCSV() {
-            if (globalRawData.length === 0) {
-                showMessage('Tidak ada data yang dapat diunduh.');
-                return;
-            }
-
-            const selectedSchool = document.getElementById('downloadSekolahSelect').value;
-            const selectedClass = document.getElementById('downloadKelasSelect').value;
-
-            // Saring data mentah berdasarkan pilihan dropdown
-            const filteredData = globalRawData.filter(item => {
-                const schoolMatch = (selectedSchool === 'all' || item['Nama Satuan Pendidikan'] === selectedSchool);
-                const classMatch = (selectedClass === 'all' || item['Kelas'].toString() === selectedClass);
-                return schoolMatch && classMatch;
-            });
-            
-            if (filteredData.length === 0) {
-                showMessage('Tidak ada data yang cocok dengan kriteria yang dipilih.');
-                return;
-            }
-
-            // Dapatkan semua header dari objek data pertama, kecuali properti internal seperti isSynced dan timestamp
-            const headers = Object.keys(filteredData[0]).filter(key => key !== 'isSynced' && key !== 'timestamp');
-            
-            // Persiapan CSV
-            const csvRows = [];
-            // Buat baris header
-            csvRows.push(headers.map(header => `"${header.replace(/"/g, '""')}"`).join(','));
-
-            // Buat baris untuk setiap data yang difilter
-            for (const item of filteredData) {
-                const values = headers.map(header => {
-                    const value = item[header];
-                    // Handle nilai null, undefined, atau non-string
-                    if (value === null || value === undefined) return '""';
-                    // Jika nilai adalah string, escape tanda kutip ganda dan tambahkan tanda kutip di sekelilingnya
-                    const stringValue = String(value);
-                    return `"${stringValue.replace(/"/g, '""')}"`;
-                });
-                csvRows.push(values.join(','));
-            }
-            
-            const csvString = csvRows.join('\n');
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            
-            // Buat nama file yang deskriptif
-            let fileName = 'data_kuesioner_global';
-            if (selectedSchool !== 'all') {
-                fileName += `_${selectedSchool.replace(/ /g, '_')}`;
-            }
-            if (selectedClass !== 'all') {
-                fileName += `_Kelas_${selectedClass}`;
-            }
-            fileName += '.csv';
-
-            // Buat link download dan picu klik
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', fileName);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showMessage('File CSV berhasil diunduh.');
+        // Perbarui tombol navigasi
+        let activeBtnId = '';
+        if (viewId === 'list') {
+            activeBtnId = 'listViewBtn';
+            editingTimestamp = null; // Reset editing index saat kembali ke daftar
+            document.getElementById('submitButton').textContent = 'Simpan Data';
+        } else if (viewId === 'rekap') {
+            activeBtnId = 'rekapViewBtn';
+        } else if (viewId === 'form') {
+            // Saat di form, tetap tandai tombol 'Daftar' sebagai aktif
+            activeBtnId = 'listViewBtn';
         }
-
-
-        // Panggil fungsi inisialisasi saat halaman dimuat
-        window.addEventListener('load', () => {
-            showView('list'); // Tampilkan tampilan daftar data saya secara default
-            checkOnlineStatusAndSync(); // Mulai sinkronisasi data offline
-        });
-        // --- Fungsi untuk mengelola tampilan halaman ---
-        function showView(viewId) {
-            const views = document.querySelectorAll('.view');
-            views.forEach(view => view.classList.remove('active')); // Sembunyikan semua tampilan
-
-            const navButtons = document.querySelectorAll('.nav-buttons button');
-            navButtons.forEach(button => button.classList.remove('active')); // Hapus active dari semua tombol nav
-
-            // Tampilkan tampilan yang diminta
-            const viewElement = document.getElementById(viewId + 'View');
-            if (viewElement) {
-                viewElement.classList.add('active');
-            }
-            
-            // Perbarui tombol navigasi
-            let activeBtnId = '';
-            if (viewId === 'list') {
-                activeBtnId = 'listViewBtn';
-            } else if (viewId === 'rekap') {
-                activeBtnId = 'rekapViewBtn';
-            } else if (viewId === 'form') {
-                // Saat di form, tetap tandai tombol 'Daftar' sebagai aktif
-                activeBtnId = 'listViewBtn';
-            }
-            
-            const activeBtn = document.getElementById(activeBtnId);
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-            }
-            
-            // Muat data yang sesuai saat tampilan berubah
-            if (viewId === 'list') {
-                loadMyDataList();
-            } else if (viewId === 'rekap') {
-                fetchGlobalData();
-            } else if (viewId === 'form') {
-                resetFormToDefaults(); // Pastikan form bersih saat ingin menambah data baru
-            }
+        
+        const activeBtn = document.getElementById(activeBtnId);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
         }
+        
+        // Muat data yang sesuai saat tampilan berubah
+        if (viewId === 'list') {
+            loadMyDataList();
+        } else if (viewId === 'rekap') {
+            fetchGlobalData();
+        } else if (viewId === 'form') {
+            if (editingTimestamp === null) {
+               resetFormToDefaults(); // Pastikan form bersih saat ingin menambah data baru
+            }
+            
+        }
+    }
 
-        // Inisialisasi tampilan field kondisional saat pertama kali dimuat
-        document.addEventListener('DOMContentLoaded', () => {
-            // Trigger change event for 'kelas' to set initial visibility of conditional fields
-            // This is handled by resetFormToDefaults now, but keeping it for safety if DOMContentLoaded fires before load
-            // document.getElementById('kelas').dispatchEvent(new Event('change'));
-        });
+    // Inisialisasi tampilan field kondisional saat pertama kali dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+        // Trigger change event for 'kelas' to set initial visibility of conditional fields
+        // This is handled by resetFormToDefaults now, but keeping it for safety if DOMContentLoaded fires before load
+        // document.getElementById('kelas').dispatchEvent(new Event('change'));
+    });
 
-    </script>
+</script>
 </body>
 </html>
